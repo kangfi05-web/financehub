@@ -311,6 +311,7 @@ function TopUpTab() {
             category: 'Tambah Modal',
             description: description || 'Penambahan modal anggota',
             nominal,
+            is_capital_adjustment: true,
           })
           .select()
           .single();
@@ -325,6 +326,7 @@ function TopUpTab() {
           share_amount: nominal,
           balance_before: balanceBefore,
           balance_after: balanceAfter,
+          is_capital_adjustment: true,
         });
         if (detErr) throw detErr;
       }
@@ -687,8 +689,12 @@ function WithdrawTab() {
       }).select().single();
       if (error) throw error;
 
-      // For group scope: insert group_transaction + member_transaction_detail so balance reflects in Group Finance
+      // For group scope: reduce member's capital + insert group_transaction + member_transaction_detail
       if (scope === 'group' && selectedGroupId && selectedMemberId) {
+        const member = groupMembers.find((m) => m.id === selectedMemberId);
+        const newCapital = Number(member?.initial_capital ?? 0) - amount;
+        await supabase.from('group_members').update({ initial_capital: newCapital }).eq('id', selectedMemberId);
+
         const grTxNo = generateTransactionNo('GR', dashData.groupTransactions.length);
         const { data: grTx, error: grErr } = await supabase
           .from('group_transactions')
@@ -730,6 +736,7 @@ function WithdrawTab() {
       qc.invalidateQueries({ queryKey: ['withdrawals'] });
       qc.invalidateQueries({ queryKey: ['group_transactions'] });
       qc.invalidateQueries({ queryKey: ['member_transaction_details'] });
+      qc.invalidateQueries({ queryKey: ['group_members'] });
     },
     onError: (err) => toast.error(err.message),
   });

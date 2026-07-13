@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.1.1';
+export const APP_VERSION = '1.2.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.2.0',
+    date: '2026-07-13',
+    title: 'Total Saldo Grup Mengikuti Saldo Tiap Anggota',
+    changes: [
+      'Diperbaiki: Tambah Modal sebelumnya dihitung ganda (menambah Total Modal DAN Total Pemasukan sekaligus). Sekarang hanya menambah Total Modal.',
+      'Penarikan Dana sekarang juga langsung mengurangi modal anggota, konsisten dengan cara Tambah Modal bekerja.',
+      'Total Modal/Saldo Grup selalu sama dengan penjumlahan saldo seluruh anggota — setiap Tambah Modal maupun Penarikan langsung tercermin di angka grup.',
+      'Total Pemasukan, Pengeluaran, dan Profit Grup murni dari transaksi operasional saja, tidak lagi terpengaruh mutasi modal.',
+    ],
+  },
   {
     version: '1.1.1',
     date: '2026-07-13',

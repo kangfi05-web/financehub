@@ -39,21 +39,17 @@ export function computeMemberSummary(
 ): MemberComputed {
   let totalIncome = 0;
   let totalExpense = 0;
-  let totalCapitalWithdrawn = 0;
   for (const d of details) {
     if (d.member_id !== member.id) continue;
+    // Penambahan/penarikan modal sudah tercermin langsung di initial_capital
+    // (live), jadi tidak dihitung lagi sebagai income/expense/profit di sini.
+    if (d.is_capital_adjustment) continue;
     const amount = Number(d.share_amount);
     const delta = Number(d.balance_after) - Number(d.balance_before);
-    if (d.is_capital_adjustment) {
-      // Penarikan modal: mengurangi saldo & modal, TIDAK dihitung sebagai
-      // pengeluaran/profit supaya tidak mengganggu perhitungan investasi.
-      if (delta < 0) totalCapitalWithdrawn += amount;
-      continue;
-    }
     if (delta > 0) totalIncome += amount;
     else totalExpense += amount;
   }
-  const currentBalance = Number(member.initial_capital) + totalIncome - totalExpense - totalCapitalWithdrawn;
+  const currentBalance = Number(member.initial_capital) + totalIncome - totalExpense;
   const profit = totalIncome - totalExpense;
   const profitPercentage = Number(member.initial_capital) > 0 ? (profit / Number(member.initial_capital)) * 100 : 0;
   return {
@@ -122,22 +118,19 @@ export function computeGroupSummary(
   members: GroupMember[],
   details: MemberTransactionDetail[]
 ): GroupFinanceSummary {
-  const staticCapital = members.reduce((sum, m) => sum + Number(m.initial_capital), 0);
+  // Total Modal/Saldo Grup = jumlah modal tiap anggota (initial_capital),
+  // yang sudah otomatis naik/turun setiap ada Tambah Modal / Penarikan Dana.
+  const totalCapital = members.reduce((sum, m) => sum + Number(m.initial_capital), 0);
   let totalIncome = 0;
   let totalExpense = 0;
-  let totalCapitalWithdrawn = 0;
   for (const d of details) {
+    // Penambahan/penarikan modal sudah tercermin di totalCapital di atas,
+    // jadi tidak dihitung lagi sebagai pemasukan/pengeluaran/profit di sini.
+    if (d.is_capital_adjustment) continue;
     const delta = Number(d.balance_after) - Number(d.balance_before);
-    if (d.is_capital_adjustment) {
-      // Penarikan modal: mengurangi Total Modal Grup secara langsung,
-      // TIDAK dihitung sebagai pengeluaran/profit grup.
-      if (delta < 0) totalCapitalWithdrawn += Number(d.share_amount);
-      continue;
-    }
     if (delta > 0) totalIncome += Number(d.share_amount);
     else totalExpense += Number(d.share_amount);
   }
-  const totalCapital = staticCapital - totalCapitalWithdrawn;
   const groupBalance = totalCapital + totalIncome - totalExpense;
   const profit = totalIncome - totalExpense;
   const profitPercentage = totalCapital > 0 ? (profit / totalCapital) * 100 : 0;

@@ -3,6 +3,30 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.2.0] - 2026-07-13
+
+### Fixed
+- **Tambah Modal dihitung ganda.** Sebelumnya, saat menambah modal anggota,
+  sistem menambah `initial_capital` anggota SEKALIGUS mencatatnya sebagai
+  transaksi "Pemasukan" biasa — sehingga Total Modal naik dua kali lipat dari
+  seharusnya, dan Profit Grup ikut naik secara keliru.
+- **Penarikan belum konsisten mengurangi modal.** Penarikan dana sebelumnya
+  hanya mengurangi saldo lewat catatan transaksi, tapi tidak mengurangi
+  `initial_capital` anggota secara langsung seperti halnya Tambah Modal.
+
+### Changed
+- Tambah Modal dan Penarikan Dana kini sama-sama langsung mengubah modal
+  (`initial_capital`) anggota — naik saat tambah modal, turun saat menarik.
+- Kedua transaksi ini ditandai `is_capital_adjustment = true` sehingga tidak
+  lagi dihitung sebagai Pemasukan/Pengeluaran/Profit operasional.
+- **Total Modal/Saldo Grup** kini selalu sama persis dengan penjumlahan
+  saldo seluruh anggota grup — setiap penambahan atau penarikan modal
+  anggota langsung tercermin di angka Total Modal Grup secara real-time.
+- Total Pemasukan, Pengeluaran, dan Profit Grup sekarang murni berasal dari
+  transaksi operasional (bukan mutasi modal).
+
+---
+
 ## [1.1.1] - 2026-07-13
 
 ### Fixed
