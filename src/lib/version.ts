@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.4.0';
+export const APP_VERSION = '1.5.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.5.0',
+    date: '2026-07-13',
+    title: 'Riwayat Detail & Perbaikan Penarikan Dana',
+    changes: [
+      'Tambah card baru "Riwayat Detail Pemasukan & Pengeluaran" di Keuangan Grup: ringkasan total besar di atas, daftar transaksi dengan total berjalan (running total) di bawah.',
+      'Diperbaiki: dropdown pemilihan anggota saat Tambah Modal/Penarikan Dana sebelumnya menampilkan Modal Awal, sehingga terlihat seolah hanya modal awal yang bisa ditarik. Sekarang menampilkan Saldo aktual (dana keseluruhan) anggota.',
+      'Label badge riwayat transaksi diperjelas: "Tambah Modal" vs "Penarikan Modal" (sebelumnya selalu tertulis "Penarikan Modal").',
+    ],
+  },
   {
     version: '1.4.0',
     date: '2026-07-13',

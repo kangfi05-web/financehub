@@ -457,7 +457,7 @@ function TopUpTab() {
                   <SelectTrigger><SelectValue placeholder="Pilih anggota" /></SelectTrigger>
                   <SelectContent>
                     {groupMembers.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>{m.name} — {formatCurrency(Number(m.initial_capital))}</SelectItem>
+                      <SelectItem key={m.id} value={m.id}>{m.name} — Saldo: {formatCurrency(getMemberBalance(m, dashData.memberDetails))}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -873,7 +873,7 @@ function WithdrawTab() {
                   <SelectTrigger><SelectValue placeholder="Pilih anggota" /></SelectTrigger>
                   <SelectContent>
                     {groupMembers.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>{m.name} — {formatCurrency(Number(m.initial_capital))}</SelectItem>
+                      <SelectItem key={m.id} value={m.id}>{m.name} — Saldo: {formatCurrency(getMemberBalance(m, dashData.memberDetails))}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

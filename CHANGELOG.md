@@ -3,6 +3,25 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.5.0] - 2026-07-13
+
+### Added
+- Card **"Riwayat Detail Pemasukan & Pengeluaran"** di halaman Keuangan
+  Grup: ringkasan Total Pemasukan/Pengeluaran besar di atas, diikuti daftar
+  transaksi kronologis dengan **total berjalan (running total)** — setiap
+  transaksi baru menambah ke total berjalan jenisnya masing-masing.
+
+### Fixed
+- **Penarikan dana terkesan dibatasi hanya sebesar Modal Awal.** Penyebabnya:
+  dropdown pemilihan anggota di Tambah Modal & Penarikan Dana menampilkan
+  `initial_capital` (modal awal), bukan saldo aktual/dana keseluruhan
+  anggota. Validasi backend sebenarnya sudah benar (memakai saldo aktual),
+  tapi tampilannya menyesatkan. Sekarang dropdown menampilkan saldo aktual.
+- Label badge "Penarikan Modal" pada riwayat transaksi sekarang dinamis:
+  "Tambah Modal" untuk penambahan, "Penarikan Modal" untuk penarikan.
+
+---
+
 ## [1.4.0] - 2026-07-13
 
 ### Added

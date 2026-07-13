@@ -34,7 +34,7 @@ import { StatCard } from '@/components/StatCard';
 import { EmptyState } from '@/components/EmptyState';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { CurrencyInput } from '@/components/CurrencyInput';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -191,6 +191,26 @@ export function GroupFinancePage() {
     () => groupMembers.map((m) => computeMemberSummary(m, groupDetails)),
     [groupMembers, groupDetails]
   );
+
+  // Riwayat detail dengan running total: urut kronologis (lama -> baru),
+  // hanya transaksi operasional (bukan Tambah Modal / Penarikan Modal).
+  const runningLedger = useMemo(() => {
+    const ops = groupTx
+      .filter((t) => !t.is_capital_adjustment)
+      .slice()
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    let runIncome = 0;
+    let runExpense = 0;
+    return ops.map((t) => {
+      const nominal = Number(t.nominal);
+      if (t.type === 'income') runIncome += nominal;
+      else runExpense += nominal;
+      return {
+        tx: t,
+        runningTotal: t.type === 'income' ? runIncome : runExpense,
+      };
+    });
+  }, [groupTx]);
 
   // Preview split for current tx input
   const splitPreview = useMemo(() => {
@@ -825,7 +845,7 @@ export function GroupFinancePage() {
                                 <TableCell>
                                   {tx.is_capital_adjustment ? (
                                     <Badge variant="outline" className="border-info text-info">
-                                      Penarikan Modal
+                                      {tx.type === 'income' ? 'Tambah Modal' : 'Penarikan Modal'}
                                     </Badge>
                                   ) : (
                                     <Badge variant={tx.type === 'income' ? 'default' : 'destructive'}
@@ -862,6 +882,68 @@ export function GroupFinancePage() {
                               </TableRow>
                             );
                           })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Riwayat Detail: ringkasan besar + running total berjalan */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Riwayat Detail Pemasukan & Pengeluaran</CardTitle>
+                  <CardDescription>Total berjalan setiap kali ada transaksi baru, terpisah pemasukan dan pengeluaran</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-5 grid grid-cols-2 gap-3">
+                    <div className="rounded-xl border border-success/20 bg-success/5 p-4 text-center">
+                      <p className="text-xs font-medium text-muted-foreground">Total Pemasukan</p>
+                      <p className="mt-1 text-2xl font-bold text-success">{formatCurrency(groupSummary.totalIncome)}</p>
+                    </div>
+                    <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-center">
+                      <p className="text-xs font-medium text-muted-foreground">Total Pengeluaran</p>
+                      <p className="mt-1 text-2xl font-bold text-destructive">{formatCurrency(groupSummary.totalExpense)}</p>
+                    </div>
+                  </div>
+
+                  {runningLedger.length === 0 ? (
+                    <EmptyState
+                      icon={<Wallet className="h-6 w-6" />}
+                      title="Belum ada riwayat"
+                      description="Riwayat detail akan muncul begitu ada transaksi pemasukan/pengeluaran operasional."
+                    />
+                  ) : (
+                    <div className="max-h-96 overflow-y-auto overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Tanggal</TableHead>
+                            <TableHead>Jenis</TableHead>
+                            <TableHead>Kategori</TableHead>
+                            <TableHead className="text-right">Nominal</TableHead>
+                            <TableHead className="text-right">Total Berjalan</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {runningLedger.slice().reverse().map(({ tx, runningTotal }) => (
+                            <TableRow key={tx.id}>
+                              <TableCell className="whitespace-nowrap text-sm">{formatDate(tx.transaction_date)}</TableCell>
+                              <TableCell>
+                                <Badge variant={tx.type === 'income' ? 'default' : 'destructive'}
+                                  className={tx.type === 'income' ? 'bg-success/10 text-success hover:bg-success/20' : ''}>
+                                  {tx.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm">{tx.category}</TableCell>
+                              <TableCell className={`text-right text-sm font-semibold ${tx.type === 'income' ? 'text-success' : 'text-destructive'}`}>
+                                {tx.type === 'income' ? '+' : '-'}{formatCurrency(Number(tx.nominal))}
+                              </TableCell>
+                              <TableCell className={`text-right text-sm font-bold ${tx.type === 'income' ? 'text-success' : 'text-destructive'}`}>
+                                {formatCurrency(runningTotal)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
                         </TableBody>
                       </Table>
                     </div>
