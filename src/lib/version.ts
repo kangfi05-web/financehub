@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.5.1';
+export const APP_VERSION = '1.6.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.6.0',
+    date: '2026-07-13',
+    title: 'Angka Berjalan di Keuangan Pribadi & Manajemen Saldo',
+    changes: [
+      'Angka berjalan sesi (seperti di Keuangan Grup) sekarang juga ada di Keuangan Pribadi, tepat di atas pilihan Jenis Transaksi.',
+      'Ditambahkan juga di Manajemen Saldo: "Total ditambahkan (sesi ini)" pada form Tambah Modal, dan "Total ditarik (sesi ini)" pada form Penarikan Dana, masing-masing dengan tombol Reset.',
+      'Tombol Reset ini murni membersihkan angka sesi di layar — TIDAK menghapus atau mengubah Pengaturan Potongan (fee) sama sekali.',
+    ],
+  },
   {
     version: '1.5.1',
     date: '2026-07-13',

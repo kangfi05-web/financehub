@@ -241,6 +241,10 @@ function TopUpTab() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
 
+  // Angka berjalan sementara (sesi ini saja, tidak tersimpan ke database,
+  // dan TIDAK memengaruhi Pengaturan Potongan). Bisa direset manual.
+  const [sessionAdded, setSessionAdded] = useState(0);
+
   const businesses = dashData.personalBusiness;
   const groups = dashData.groups;
   const groupMembers = useMemo(
@@ -336,6 +340,7 @@ function TopUpTab() {
     },
     onSuccess: () => {
       toast.success('Penambahan modal berhasil disimpan');
+      setSessionAdded((v) => v + nominal);
       setNominal(0);
       setDescription('');
       qc.invalidateQueries({ queryKey: ['capital_additions'] });
@@ -405,6 +410,16 @@ function TopUpTab() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {sessionAdded > 0 && (
+            <div className="flex items-center justify-between gap-2 rounded-lg border border-success/20 bg-success/5 px-3 py-2">
+              <span className="text-sm font-medium text-success">
+                Total ditambahkan (sesi ini): {formatCurrency(sessionAdded)}
+              </span>
+              <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={() => setSessionAdded(0)}>
+                Reset
+              </Button>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
@@ -605,6 +620,10 @@ function WithdrawTab() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
 
+  // Angka berjalan sementara (sesi ini saja, tidak tersimpan ke database,
+  // dan TIDAK memengaruhi Pengaturan Potongan). Bisa direset manual.
+  const [sessionWithdrawn, setSessionWithdrawn] = useState(0);
+
   const businesses = dashData.personalBusiness;
   const groups = dashData.groups;
   const groupMembers = useMemo(
@@ -745,6 +764,7 @@ function WithdrawTab() {
     },
     onSuccess: () => {
       toast.success('Penarikan dana berhasil diproses');
+      setSessionWithdrawn((v) => v + amount);
       setAmount(0);
       setReason('');
       qc.invalidateQueries({ queryKey: ['withdrawals'] });
@@ -821,6 +841,16 @@ function WithdrawTab() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {sessionWithdrawn > 0 && (
+            <div className="flex items-center justify-between gap-2 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2">
+              <span className="text-sm font-medium text-destructive">
+                Total ditarik (sesi ini): {formatCurrency(sessionWithdrawn)}
+              </span>
+              <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={() => setSessionWithdrawn(0)}>
+                Reset
+              </Button>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"

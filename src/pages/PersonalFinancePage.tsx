@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -87,6 +87,16 @@ export function PersonalFinancePage() {
   const [editingTx, setEditingTx] = useState<PersonalTransaction | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ type: 'tx' | 'business' | 'reset'; id?: string } | null>(null);
   const [search, setSearch] = useState('');
+
+  // Angka berjalan sementara (sesi ini saja, tidak tersimpan ke database):
+  // bertambah tiap kali submit transaksi, dan bisa direset manual.
+  const [sessionIncome, setSessionIncome] = useState(0);
+  const [sessionExpense, setSessionExpense] = useState(0);
+
+  useEffect(() => {
+    setSessionIncome(0);
+    setSessionExpense(0);
+  }, [selectedBizId]);
 
   // Queries
   const businessesQ = useQuery({
@@ -214,6 +224,8 @@ export function PersonalFinancePage() {
     },
     onSuccess: () => {
       toast.success(txType === 'income' ? 'Pemasukan berhasil ditambahkan' : 'Pengeluaran berhasil ditambahkan');
+      if (txType === 'income') setSessionIncome((v) => v + txNominal);
+      else setSessionExpense((v) => v + txNominal);
       resetTxForm();
       setShowTxDialog(false);
       qc.invalidateQueries({ queryKey: ['personal_transactions'] });
@@ -483,6 +495,30 @@ export function PersonalFinancePage() {
               {/* Quick transaction entry — inline, no dialog */}
               <Card className="animate-slide-up">
                 <CardContent className="p-4 sm:p-5">
+                  {(sessionIncome > 0 || sessionExpense > 0) && (
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                      <div className="flex flex-wrap items-center gap-3 text-sm">
+                        {sessionExpense > 0 && (
+                          <span className="font-medium text-destructive">
+                            Pengeluaran berjalan: {formatCurrency(sessionExpense)}
+                          </span>
+                        )}
+                        {sessionIncome > 0 && (
+                          <span className="font-medium text-success">
+                            Pemasukan berjalan: {formatCurrency(sessionIncome)}
+                          </span>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs text-muted-foreground"
+                        onClick={() => { setSessionIncome(0); setSessionExpense(0); }}
+                      >
+                        Reset
+                      </Button>
+                    </div>
+                  )}
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                     <div className="flex-1">
                       <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">Jenis Transaksi</Label>

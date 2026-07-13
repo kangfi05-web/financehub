@@ -3,6 +3,24 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.6.0] - 2026-07-13
+
+### Added
+- Angka berjalan sesi (pola yang sama seperti Keuangan Grup) sekarang juga
+  tersedia di **Keuangan Pribadi**, di atas pilihan Jenis Transaksi.
+- Angka berjalan sesi di **Manajemen Saldo**:
+  - Form **Tambah Modal**: "Total ditambahkan (sesi ini)".
+  - Form **Penarikan Dana**: "Total ditarik (sesi ini)".
+  - Masing-masing punya tombol **Reset** sendiri.
+
+### Notes
+- Tombol Reset di atas murni membersihkan angka tampilan sesi (React state
+  lokal, tidak tersimpan ke database) — **tidak** menyentuh data
+  **Pengaturan Potongan** (`withdrawal_settings`, `member_withdrawal_settings`)
+  sama sekali.
+
+---
+
 ## [1.5.1] - 2026-07-13
 
 ### Changed (koreksi dari v1.5.0)
