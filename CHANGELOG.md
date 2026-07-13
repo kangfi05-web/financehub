@@ -3,6 +3,26 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.1.1] - 2026-07-13
+
+### Fixed
+- Error `Could not find the 'is_capital_adjustment' column` saat penarikan
+  saldo. Penyebab akarnya: project Supabase asli (`ocnslncgjvlrckdhthpc`,
+  dibuat otomatis oleh Bolt.new) sudah tidak bisa diakses/tidak ditemukan.
+
+### Changed
+- Database dipindahkan ke project Supabase baru (`dnvhyrbrrnvuvoxsbclp`).
+- Seluruh migration dijalankan ulang di project baru: schema utama, modul
+  manajemen saldo, dan flag `is_capital_adjustment`.
+- `VITE_SUPABASE_URL` & `VITE_SUPABASE_ANON_KEY` di Netlify diarahkan ke
+  project baru.
+
+### Known Impact
+- Data lama (grup, anggota, transaksi) tidak dapat dipulihkan karena project
+  lama sudah tidak dapat diakses. Aplikasi mulai dari database kosong.
+
+---
+
 ## [1.1.0] - 2026-07-13
 
 ### Fixed

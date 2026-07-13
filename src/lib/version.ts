@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.1.0';
+export const APP_VERSION = '1.1.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.1.1',
+    date: '2026-07-13',
+    title: 'Migrasi ke Project Supabase Baru',
+    changes: [
+      'Project Supabase lama (dibuat otomatis oleh Bolt.new) sudah tidak bisa diakses.',
+      'Database baru dibuat dan seluruh migration dijalankan ulang (schema utama, modul saldo, flag penarikan modal).',
+      'Environment variable Netlify diarahkan ke project Supabase baru.',
+      'Catatan: data lama (jika ada) tidak dapat dipulihkan — mulai dari database kosong.',
+    ],
+  },
   {
     version: '1.1.0',
     date: '2026-07-13',
