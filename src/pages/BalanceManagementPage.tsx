@@ -701,6 +701,7 @@ function WithdrawTab() {
             category: 'Penarikan Dana',
             description: reason || `Penarikan oleh anggota • Potongan: ${formatCurrency(wCalc.feeAmount)}`,
             nominal: amount,
+            is_capital_adjustment: true,
           })
           .select()
           .single();
@@ -715,6 +716,7 @@ function WithdrawTab() {
           share_amount: amount,
           balance_before: balanceBefore,
           balance_after: wCalc.balanceAfter,
+          is_capital_adjustment: true,
         });
         if (detErr) throw detErr;
       }

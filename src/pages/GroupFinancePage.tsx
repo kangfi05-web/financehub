@@ -823,10 +823,16 @@ export function GroupFinancePage() {
                               <TableRow key={tx.id} className="group">
                                 <TableCell className="whitespace-nowrap text-sm">{formatDate(tx.transaction_date)}</TableCell>
                                 <TableCell>
-                                  <Badge variant={tx.type === 'income' ? 'default' : 'destructive'}
-                                    className={tx.type === 'income' ? 'bg-success/10 text-success hover:bg-success/20' : ''}>
-                                    {tx.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
-                                  </Badge>
+                                  {tx.is_capital_adjustment ? (
+                                    <Badge variant="outline" className="border-info text-info">
+                                      Penarikan Modal
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant={tx.type === 'income' ? 'default' : 'destructive'}
+                                      className={tx.type === 'income' ? 'bg-success/10 text-success hover:bg-success/20' : ''}>
+                                      {tx.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
+                                    </Badge>
+                                  )}
                                 </TableCell>
                                 <TableCell className="text-sm">{tx.category}</TableCell>
                                 <TableCell className={`text-right text-sm font-semibold ${tx.type === 'income' ? 'text-success' : 'text-destructive'}`}>

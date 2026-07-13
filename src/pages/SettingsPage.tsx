@@ -14,6 +14,7 @@ import { Switch } from '@/components/ui/switch';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/format';
+import { APP_VERSION, CHANGELOG } from '@/lib/version';
 
 export function SettingsPage() {
   const { user, profile, signOut } = useAuth();
@@ -333,6 +334,39 @@ export function SettingsPage() {
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* App version & changelog */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Tentang Aplikasi</CardTitle>
+              <CardDescription>Versi saat ini dan riwayat perbaikan/update</CardDescription>
+            </div>
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              v{APP_VERSION}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {CHANGELOG.map((entry) => (
+              <div key={entry.version} className="border-l-2 border-border pl-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold">v{entry.version}</span>
+                  <span className="text-xs text-muted-foreground">{formatDate(entry.date)}</span>
+                </div>
+                <p className="text-sm font-medium text-foreground">{entry.title}</p>
+                <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-muted-foreground">
+                  {entry.changes.map((c, i) => (
+                    <li key={i}>{c}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 

@@ -64,6 +64,7 @@ export interface GroupTransaction {
   category: string;
   description: string | null;
   nominal: number;
+  is_capital_adjustment: boolean;
   created_at: string;
 }
 
@@ -77,6 +78,7 @@ export interface MemberTransactionDetail {
   share_amount: number;
   balance_before: number;
   balance_after: number;
+  is_capital_adjustment: boolean;
   created_at: string;
 }
 
