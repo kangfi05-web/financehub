@@ -3,6 +3,25 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.5.1] - 2026-07-13
+
+### Changed (koreksi dari v1.5.0)
+- Card **"Riwayat Detail Pemasukan & Pengeluaran"** (permanen, tabel penuh)
+  dihapus — ternyata bukan yang dimaksud, dan datanya sudah ada di Riwayat
+  Transaksi Grup.
+
+### Added
+- **Angka berjalan sementara** di form tambah transaksi cepat (Keuangan
+  Grup), tepat di atas pilihan "Jenis Transaksi":
+  - Tiap submit Pengeluaran menambah ke total berjalan Pengeluaran.
+  - Tiap submit Pemasukan menambah ke total berjalan Pemasukan (terpisah).
+  - Kalau keduanya pernah diisi, keduanya tampil sekaligus secara ringkas.
+  - Bersifat sesaat: hanya untuk sesi saat ini (tidak tersimpan ke
+    database), ada tombol "Reset" manual, dan otomatis reset saat pindah
+    grup.
+
+---
+
 ## [1.5.0] - 2026-07-13
 
 ### Added

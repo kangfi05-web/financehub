@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.5.0';
+export const APP_VERSION = '1.5.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.5.1',
+    date: '2026-07-13',
+    title: 'Angka Berjalan di Form Tambah Transaksi Grup',
+    changes: [
+      'Koreksi dari v1.5.0: card "Riwayat Detail" permanen dihapus karena data serupa sudah ada di Riwayat Transaksi Grup.',
+      'Sebagai gantinya: ditambahkan angka berjalan sementara tepat di atas pilihan "Jenis Transaksi" pada form tambah transaksi cepat. Setiap submit Pengeluaran menambah totalnya (mis. 10.000 lalu +10.000 jadi 20.000), begitu juga Pemasukan, dihitung terpisah.',
+      'Angka ini bersifat sesaat (khusus sesi saat ini, tidak tersimpan) dan bisa direset manual lewat tombol "Reset". Otomatis reset juga saat pindah grup.',
+    ],
+  },
   {
     version: '1.5.0',
     date: '2026-07-13',
