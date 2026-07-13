@@ -3,6 +3,19 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.4.0] - 2026-07-13
+
+### Added
+- **PWA (Progressive Web App)** — FinanceHub sekarang bisa di-install ke
+  HP/laptop langsung dari browser, tanpa App Store/Play Store.
+- Ikon aplikasi (72px–512px + maskable) dan manifest dengan tema warna brand.
+- Banner "Install FinanceHub" otomatis muncul saat browser mendukung, bisa
+  ditutup. Tombol install permanen juga tersedia di Pengaturan.
+- Service worker meng-cache aset statis untuk loading lebih cepat di
+  kunjungan berikutnya.
+
+---
+
 ## [1.3.0] - 2026-07-13
 
 ### Added

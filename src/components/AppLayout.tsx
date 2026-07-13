@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
+import { InstallAppBanner } from '@/components/InstallAppBanner';
 
 export function AppLayout() {
   return (
@@ -8,6 +9,7 @@ export function AppLayout() {
       <main className="lg:pl-64">
         <div className="min-h-screen">
           <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8 lg:py-8">
+            <InstallAppBanner />
             <Outlet />
           </div>
         </div>

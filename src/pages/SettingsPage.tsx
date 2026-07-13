@@ -15,6 +15,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/format';
 import { APP_VERSION, CHANGELOG } from '@/lib/version';
+import { InstallAppButton } from '@/components/InstallAppBanner';
 
 export function SettingsPage() {
   const { user, profile, signOut } = useAuth();
@@ -334,6 +335,17 @@ export function SettingsPage() {
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Install as app */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Install Aplikasi</CardTitle>
+          <CardDescription>Pasang FinanceHub di HP atau laptop kamu, akses langsung tanpa buka browser.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <InstallAppButton />
         </CardContent>
       </Card>
 

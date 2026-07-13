@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.3.0';
+export const APP_VERSION = '1.4.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.4.0',
+    date: '2026-07-13',
+    title: 'Aplikasi Bisa Di-install (PWA)',
+    changes: [
+      'FinanceHub sekarang bisa di-install langsung dari browser ke HP/laptop, seperti aplikasi native — tanpa perlu App Store/Play Store.',
+      'Tersedia tombol "Install Aplikasi" di halaman Pengaturan, plus banner otomatis saat browser mendukung.',
+      'Ikon aplikasi & splash screen ditambahkan untuk pengalaman standalone.',
+      'Aset statis di-cache otomatis agar loading berikutnya lebih cepat.',
+    ],
+  },
   {
     version: '1.3.0',
     date: '2026-07-13',
