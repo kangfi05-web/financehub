@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.2.0';
+export const APP_VERSION = '1.3.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.3.0',
+    date: '2026-07-13',
+    title: 'Konfirmasi Sebelum Transaksi Saldo',
+    changes: [
+      'Tambah Modal dan Penarikan Dana sekarang menampilkan dialog konfirmasi berisi ringkasan (nominal, potongan, saldo sebelum/sesudah) sebelum benar-benar diproses.',
+      'Mengurangi risiko salah input nominal yang langsung tersimpan tanpa jeda konfirmasi.',
+    ],
+  },
   {
     version: '1.2.0',
     date: '2026-07-13',

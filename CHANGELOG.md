@@ -3,6 +3,21 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.3.0] - 2026-07-13
+
+### Added
+- Dialog konfirmasi sebelum submit **Tambah Modal** dan **Penarikan Dana**,
+  menampilkan ringkasan nominal, potongan/fee, dan saldo sebelum-sesudah.
+  Mengurangi risiko salah input nominal besar yang langsung tersimpan tanpa
+  jeda konfirmasi.
+
+### Security Note (manual, dashboard-only)
+- Direkomendasikan mengaktifkan **Leaked Password Protection** di Supabase
+  Dashboard → Authentication → Providers → Email (tidak bisa diaktifkan
+  lewat migration/API, hanya lewat dashboard).
+
+---
+
 ## [1.2.0] - 2026-07-13
 
 ### Fixed

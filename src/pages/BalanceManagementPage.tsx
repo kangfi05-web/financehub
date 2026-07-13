@@ -239,6 +239,7 @@ function TopUpTab() {
   const [description, setDescription] = useState('');
   const [search, setSearch] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [confirmSubmit, setConfirmSubmit] = useState(false);
 
   const businesses = dashData.personalBusiness;
   const groups = dashData.groups;
@@ -493,7 +494,7 @@ function TopUpTab() {
           )}
 
           <Button
-            onClick={() => addCapitalMut.mutate()}
+            onClick={() => setConfirmSubmit(true)}
             disabled={nominal <= 0 || addCapitalMut.isPending || (scope === 'personal' ? !selectedBizId : !selectedMemberId)}
             className="bg-success text-success-foreground hover:bg-success/90"
           >
@@ -568,6 +569,18 @@ function TopUpTab() {
         confirmText="Hapus" destructive
         onConfirm={() => confirmDelete && deleteCapitalMut.mutate(confirmDelete)}
       />
+      <ConfirmDialog
+        open={confirmSubmit}
+        onOpenChange={setConfirmSubmit}
+        title="Konfirmasi Penambahan Modal"
+        description={`Tambah modal sebesar ${formatCurrency(nominal)} untuk ${
+          scope === 'personal'
+            ? businesses.find((b) => b.id === selectedBizId)?.name ?? 'bisnis ini'
+            : groupMembers.find((m) => m.id === selectedMemberId)?.name ?? 'anggota ini'
+        }? Saldo akan menjadi ${formatCurrency(currentBalance + nominal)}.`}
+        confirmText="Ya, Simpan"
+        onConfirm={() => addCapitalMut.mutate()}
+      />
     </div>
   );
 }
@@ -590,6 +603,7 @@ function WithdrawTab() {
   const [reason, setReason] = useState('');
   const [search, setSearch] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [confirmSubmit, setConfirmSubmit] = useState(false);
 
   const businesses = dashData.personalBusiness;
   const groups = dashData.groups;
@@ -916,7 +930,7 @@ function WithdrawTab() {
           )}
 
           <Button
-            onClick={() => withdrawMut.mutate()}
+            onClick={() => setConfirmSubmit(true)}
             disabled={amount <= 0 || withdrawMut.isPending || !validation.valid || (scope === 'personal' ? !selectedBizId : !selectedMemberId)}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
@@ -996,6 +1010,19 @@ function WithdrawTab() {
         description="Catatan ini akan dihapus dari riwayat. Saldo tidak akan dikembalikan otomatis."
         confirmText="Hapus" destructive
         onConfirm={() => confirmDelete && deleteWithdrawMut.mutate(confirmDelete)}
+      />
+      <ConfirmDialog
+        open={confirmSubmit}
+        onOpenChange={setConfirmSubmit}
+        title="Konfirmasi Penarikan Dana"
+        description={`Tarik dana sebesar ${formatCurrency(amount)} dari ${
+          scope === 'personal'
+            ? businesses.find((b) => b.id === selectedBizId)?.name ?? 'bisnis ini'
+            : groupMembers.find((m) => m.id === selectedMemberId)?.name ?? 'anggota ini'
+        }? Setelah dipotong biaya ${formatCurrency(calc?.feeAmount ?? 0)}, dana bersih diterima ${formatCurrency(calc?.netReceived ?? 0)}. Saldo akan menjadi ${formatCurrency(calc?.balanceAfter ?? 0)}.`}
+        confirmText="Ya, Tarik Dana"
+        destructive
+        onConfirm={() => withdrawMut.mutate()}
       />
     </div>
   );
