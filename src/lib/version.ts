@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.7.1';
+export const APP_VERSION = '1.8.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.8.0',
+    date: '2026-07-14',
+    title: 'Perintah Bot Lengkap: Tambah Modal & Tarik Dana',
+    changes: [
+      'Bot Telegram sekarang mendukung SEMUA aksi utama aplikasi: /pengeluaran, /pemasukan, /tambahmodal, /tarik, dan /saldo — untuk Keuangan Pribadi maupun Grup.',
+      'Perintah grup bisa menyebutkan nama anggota, contoh: "/tambahmodal 500rb grup mining Budi" atau "/tarik 100000 grup mining Budi ambil profit".',
+      'Penarikan dana lewat bot otomatis menghitung potongan biaya sesuai Pengaturan Potongan (per-anggota atau default grup), sama seperti di aplikasi.',
+      'Perintah /saldo bisa dipersempit: /saldo grup <nama> untuk total grup, atau /saldo grup <nama> <anggota> untuk saldo satu anggota.',
+    ],
+  },
   {
     version: '1.7.1',
     date: '2026-07-14',

@@ -3,6 +3,25 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.8.0] - 2026-07-14
+
+### Added
+- **Perintah bot lengkap** — semua aksi utama aplikasi kini bisa dilakukan
+  lewat Telegram:
+  - `/tambahmodal <nominal> [deskripsi]` — Tambah Modal Pribadi
+  - `/tambahmodal <nominal> grup <nama grup> <nama anggota> [deskripsi]` — Tambah Modal Grup
+  - `/tarik <nominal> [alasan]` — Tarik Dana Pribadi
+  - `/tarik <nominal> grup <nama grup> <nama anggota> [alasan]` — Tarik Dana Grup
+  - `/saldo grup <nama grup> <nama anggota>` — saldo satu anggota spesifik
+- Penarikan dana lewat bot menghitung potongan biaya otomatis, memakai
+  prioritas yang sama seperti aplikasi: override per-anggota
+  (`member_withdrawal_settings`) dulu, baru fallback ke setting grup
+  (`withdrawal_settings`).
+- Pencarian nama grup/anggota fleksibel: bisa nama sebagian/awalan, tidak
+  harus persis sama.
+
+---
+
 ## [1.7.1] - 2026-07-14
 
 ### Fixed
