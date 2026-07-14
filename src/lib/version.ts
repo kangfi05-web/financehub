@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.8.1';
+export const APP_VERSION = '1.8.2';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.8.2',
+    date: '2026-07-14',
+    title: 'Realtime Sync Kini Berlaku di Semua Halaman',
+    changes: [
+      'Diperbaiki: auto-refresh realtime sebelumnya cuma aktif di Dashboard, Riwayat, dan Laporan — halaman Keuangan Grup dan Keuangan Pribadi tidak ikut ter-update karena punya query data sendiri yang terpisah.',
+      'Sistem realtime dipindahkan ke level AppLayout (selalu aktif di semua halaman), sehingga transaksi dari bot Telegram kini langsung muncul di Keuangan Grup maupun Keuangan Pribadi tanpa reload.',
+    ],
+  },
   {
     version: '1.8.1',
     date: '2026-07-14',

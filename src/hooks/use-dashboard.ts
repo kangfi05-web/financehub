@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 import type { PersonalBusiness, PersonalTransaction, Group, GroupMember, GroupTransaction, MemberTransactionDetail, AuditLog, CapitalAddition, Withdrawal } from '@/types';
@@ -7,35 +6,6 @@ import type { PersonalBusiness, PersonalTransaction, Group, GroupMember, GroupTr
 export function useDashboardData() {
   const { user } = useAuth();
   const userId = user?.id ?? '';
-  const qc = useQueryClient();
-
-  // Realtime: auto-refresh saat ada transaksi baru dari sumber manapun
-  // (termasuk bot Telegram), tanpa perlu reload manual.
-  useEffect(() => {
-    if (!userId) return;
-    const tables = [
-      'personal_business',
-      'personal_transactions',
-      'groups',
-      'group_members',
-      'group_transactions',
-      'member_transaction_details',
-      'capital_additions',
-      'withdrawals',
-    ];
-    const channel = supabase.channel(`realtime-sync-${userId}`);
-    for (const table of tables) {
-      channel.on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table, filter: `user_id=eq.${userId}` },
-        () => qc.invalidateQueries({ queryKey: [table] })
-      );
-    }
-    channel.subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [userId, qc]);
 
   const personalBusiness = useQuery({
     queryKey: ['personal_business', userId],

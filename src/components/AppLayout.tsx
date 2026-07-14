@@ -1,8 +1,11 @@
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 import { InstallAppBanner } from '@/components/InstallAppBanner';
+import { useRealtimeSync } from '@/hooks/use-realtime-sync';
 
 export function AppLayout() {
+  useRealtimeSync();
+
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />

@@ -3,6 +3,24 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.8.2] - 2026-07-14
+
+### Fixed
+- **Realtime tidak berlaku di Keuangan Grup & Keuangan Pribadi.** Sebelumnya
+  langganan realtime dipasang di dalam hook `useDashboardData`, yang hanya
+  dipakai oleh Dashboard, Riwayat, dan Laporan. Halaman Keuangan Grup dan
+  Keuangan Pribadi memakai query data sendiri (terpisah), sehingga tidak
+  pernah "mendengar" perubahan data dari bot Telegram — harus refresh
+  manual, meski Dashboard sudah update otomatis.
+
+### Changed
+- Realtime sync dipindahkan ke `AppLayout` (komponen yang selalu aktif di
+  semua halaman berlogin), lewat hook baru `useRealtimeSync`. Sekarang
+  SEMUA halaman ikut auto-refresh saat ada perubahan data dari mana pun,
+  termasuk dari perintah bot Telegram.
+
+---
+
 ## [1.8.1] - 2026-07-14
 
 ### Fixed
