@@ -3,6 +3,17 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.8.1] - 2026-07-14
+
+### Fixed
+- **Perintah grup masih salah masuk ke Pribadi saat pengeluaran.** Akar
+  masalah: bot hanya mendeteksi kata "grup" jika berada TEPAT setelah
+  nominal. Kalau user menulis kata lain duluan (mis. "300000 keuangan
+  grup a bensin"), deteksi gagal dan transaksi jatuh ke Keuangan Pribadi.
+  Sekarang bot mencari kata "grup" di posisi mana pun dalam kalimat.
+
+---
+
 ## [1.8.0] - 2026-07-14
 
 ### Added

@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.8.0';
+export const APP_VERSION = '1.8.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.8.1',
+    date: '2026-07-14',
+    title: 'Bot: Deteksi Kata "grup" Lebih Fleksibel',
+    changes: [
+      'Diperbaiki: kata "grup" sekarang dikenali di MANA PUN posisinya dalam kalimat, tidak harus tepat setelah nominal. Contoh "300000 keuangan grup a bensin" sekarang tetap terdeteksi sebagai transaksi Grup, bukan salah masuk ke Pribadi.',
+      'Teks sebelum kata "grup" otomatis digabung sebagai bagian dari kategori/deskripsi.',
+    ],
+  },
   {
     version: '1.8.0',
     date: '2026-07-14',
