@@ -3,6 +3,28 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.7.1] - 2026-07-14
+
+### Fixed
+- **Bot mencatat ke tempat yang salah.** Perintah seperti
+  `/pengeluaran 200000 grup a` sebelumnya dianggap kategori teks biasa
+  ("grup a"), sehingga transaksi selalu masuk ke Keuangan Pribadi meski
+  user menargetkan Grup. Sekarang bot mengenali kata kunci `grup <nama>`
+  dan mencatat ke Keuangan Grup yang benar.
+- **Data tidak auto-update.** Transaksi yang ditambahkan lewat bot
+  Telegram (atau sumber lain) tidak langsung terlihat di aplikasi tanpa
+  reload manual. Sekarang aplikasi memakai Supabase Realtime untuk
+  auto-refresh begitu ada perubahan data.
+
+### Added
+- Bot bisa mencatat ke **Keuangan Grup**, otomatis dibagi proporsional ke
+  semua anggota sesuai porsi modal masing-masing (sama seperti transaksi
+  grup lewat aplikasi).
+- Perintah baru: `/saldo grup <nama grup>`.
+- Realtime sync aktif untuk semua tabel transaksi utama.
+
+---
+
 ## [1.7.0] - 2026-07-13
 
 ### Added

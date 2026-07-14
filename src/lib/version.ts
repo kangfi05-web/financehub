@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.7.0';
+export const APP_VERSION = '1.7.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.7.1',
+    date: '2026-07-14',
+    title: 'Bot Bisa Catat ke Grup + Auto-Refresh',
+    changes: [
+      'Bot Telegram sekarang bisa mencatat transaksi ke Keuangan Grup: "/pengeluaran 200000 grup investasi a bensin" — otomatis terbagi proporsional ke semua anggota sesuai modal masing-masing.',
+      'Tambah perintah "/saldo grup <nama>" untuk cek saldo grup lewat bot.',
+      'Diperbaiki: sebelumnya kata "grup <nama>" salah dianggap kategori biasa dan transaksi masuk ke Keuangan Pribadi.',
+      'Aplikasi sekarang auto-refresh real-time — transaksi yang dicatat lewat bot langsung muncul di app tanpa perlu reload manual.',
+    ],
+  },
   {
     version: '1.7.0',
     date: '2026-07-13',
