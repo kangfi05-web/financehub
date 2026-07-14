@@ -24,6 +24,46 @@ export function SettingsPage() {
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
   const [notifications, setNotifications] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [tgLinkCode, setTgLinkCode] = useState<string | null>(null);
+  const [showUnlinkTg, setShowUnlinkTg] = useState(false);
+
+  const tgAccountQ = useQuery({
+    queryKey: ['telegram_account', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from('telegram_accounts').select('*').eq('user_id', user!.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const generateTgCodeMut = useMutation({
+    mutationFn: async () => {
+      const code = Math.random().toString(36).slice(2, 8).toUpperCase();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+      const { error } = await supabase.from('telegram_link_codes').insert({
+        user_id: user!.id,
+        code,
+        expires_at: expiresAt,
+      });
+      if (error) throw error;
+      return code;
+    },
+    onSuccess: (code) => setTgLinkCode(code),
+    onError: (err) => toast.error(err.message),
+  });
+
+  const unlinkTgMut = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from('telegram_accounts').delete().eq('user_id', user!.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('Telegram berhasil diputuskan');
+      setShowUnlinkTg(false);
+      qc.invalidateQueries({ queryKey: ['telegram_account'] });
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   const settingsQ = useQuery({
     queryKey: ['settings', user?.id],
@@ -338,6 +378,50 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Telegram bot integration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Hubungkan Telegram</CardTitle>
+          <CardDescription>Catat transaksi lewat perintah teks di Telegram, tanpa buka aplikasi.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {tgAccountQ.data ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between rounded-lg border border-success/20 bg-success/5 px-3 py-2">
+                <span className="text-sm text-success">
+                  ✓ Terhubung {tgAccountQ.data.telegram_username ? `sebagai @${tgAccountQ.data.telegram_username}` : ''}
+                </span>
+                <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => setShowUnlinkTg(true)}>
+                  Putuskan
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Kirim <code className="rounded bg-muted px-1">/help</code> ke bot untuk lihat daftar perintah.
+              </p>
+            </div>
+          ) : tgLinkCode ? (
+            <div className="space-y-3">
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-center">
+                <p className="text-xs text-muted-foreground">Kode Penghubung (berlaku 10 menit)</p>
+                <p className="mt-1 text-2xl font-bold tracking-widest text-primary">{tgLinkCode}</p>
+              </div>
+              <ol className="list-decimal space-y-1 pl-4 text-sm text-muted-foreground">
+                <li>Buka bot Telegram FinanceHub</li>
+                <li>Kirim pesan: <code className="rounded bg-muted px-1">/start {tgLinkCode}</code></li>
+                <li>Tunggu balasan konfirmasi dari bot</li>
+              </ol>
+              <Button variant="outline" size="sm" onClick={() => generateTgCodeMut.mutate()}>
+                Generate Kode Baru
+              </Button>
+            </div>
+          ) : (
+            <Button onClick={() => generateTgCodeMut.mutate()} disabled={generateTgCodeMut.isPending}>
+              {generateTgCodeMut.isPending ? 'Membuat kode...' : 'Generate Kode Penghubung'}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Install as app */}
       <Card>
         <CardHeader>
@@ -399,6 +483,15 @@ export function SettingsPage() {
         confirmText="Hapus Semua"
         destructive
         onConfirm={() => deleteAllMut.mutate()}
+      />
+      <ConfirmDialog
+        open={showUnlinkTg}
+        onOpenChange={setShowUnlinkTg}
+        title="Putuskan Koneksi Telegram?"
+        description="Bot tidak akan bisa mencatat transaksi lagi sampai kamu hubungkan ulang."
+        confirmText="Putuskan"
+        destructive
+        onConfirm={() => unlinkTgMut.mutate()}
       />
     </div>
   );

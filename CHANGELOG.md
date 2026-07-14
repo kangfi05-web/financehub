@@ -3,6 +3,28 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.7.0] - 2026-07-13
+
+### Added
+- **Integrasi Telegram Bot (Tahap 1)** — mencatat transaksi Keuangan
+  Pribadi lewat perintah teks di Telegram, tanpa buka aplikasi:
+  - `/start <kode>` — hubungkan akun Telegram ke FinanceHub
+  - `/pengeluaran <nominal> [kategori]` — catat pengeluaran
+  - `/pemasukan <nominal> [kategori]` — catat pemasukan
+  - `/saldo` — cek saldo bisnis pribadi
+  - `/help` — bantuan
+  - Nominal fleksibel: 50000, 50.000, 50rb, 50k, 1.5jt
+- Halaman **Pengaturan → Hubungkan Telegram**: generate kode sekali pakai
+  (berlaku 10 menit) untuk menghubungkan akun.
+- Edge Function `telegram-webhook` di Supabase sebagai penerima pesan bot.
+- Tabel baru: `telegram_link_codes`, `telegram_accounts`.
+
+### Roadmap (belum dikerjakan)
+- Tahap 2: dukungan pencatatan Keuangan Grup lewat bot.
+- Tahap 3: baca foto struk/nota otomatis pakai AI vision (OCR).
+
+---
+
 ## [1.6.0] - 2026-07-13
 
 ### Added

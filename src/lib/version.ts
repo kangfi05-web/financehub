@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.6.0';
+export const APP_VERSION = '1.7.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.7.0',
+    date: '2026-07-13',
+    title: 'Integrasi Telegram Bot (Tahap 1)',
+    changes: [
+      'Bisa catat transaksi Keuangan Pribadi lewat perintah teks di Telegram: /pengeluaran, /pemasukan, /saldo, /help.',
+      'Halaman Pengaturan → "Hubungkan Telegram": generate kode sekali pakai untuk menghubungkan akun Telegram ke akun FinanceHub.',
+      'Nominal fleksibel: bisa ditulis 50000, 50.000, 50rb, 50k, atau 1.5jt.',
+      'Tahap selanjutnya: dukungan Keuangan Grup lewat bot, dan pembacaan foto struk otomatis (OCR/AI vision).',
+    ],
+  },
   {
     version: '1.6.0',
     date: '2026-07-13',
