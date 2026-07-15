@@ -3,6 +3,21 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.10.1] - 2026-07-15
+
+### Fixed
+- **Papan Peringkat salah urutan.** Sebelumnya diurutkan berdasarkan
+  persentase profit — tapi karena transaksi grup dibagi proporsional
+  sesuai porsi modal, persentase profit SELALU sama untuk semua anggota
+  (semua dapat return % yang sama), sehingga urutan peringkat jadi acak/
+  tidak mencerminkan siapa yang benar-benar untung paling besar.
+- Sekarang diurutkan berdasarkan **profit dalam Rupiah**, jadi anggota
+  dengan nominal keuntungan terbesar benar-benar menempati peringkat 1.
+- Tampilan kartu peringkat disesuaikan: nominal Rupiah jadi angka utama
+  (lebih besar/tebal), persentase jadi info sekunder.
+
+---
+
 ## [1.10.0] - 2026-07-15
 
 ### Added

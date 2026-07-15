@@ -485,9 +485,13 @@ export function GroupFinancePage() {
 
   const memberLineColors = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--destructive))', 'hsl(var(--info))', '#f59e0b', '#a855f7', '#ec4899', '#14b8a6'];
 
-  // Papan peringkat: urutkan anggota berdasarkan profit % tertinggi.
+  // Papan peringkat: urutkan anggota berdasarkan profit nominal (Rupiah)
+  // tertinggi. Catatan: kalau transaksi grup dibagi proporsional sesuai
+  // modal, persentase profit semua anggota akan SAMA (karena semua orang
+  // dapat porsi return yang sama secara %) — jadi nominal Rupiah jauh
+  // lebih berguna untuk membedakan siapa yang paling banyak "menghasilkan".
   const leaderboard = useMemo(
-    () => [...memberSummaries].sort((a, b) => b.profitPercentage - a.profitPercentage),
+    () => [...memberSummaries].sort((a, b) => b.profit - a.profit),
     [memberSummaries]
   );
 
@@ -925,9 +929,9 @@ export function GroupFinancePage() {
                               </div>
                               <div className="text-right">
                                 <p className={`text-sm font-bold ${m.profit >= 0 ? 'text-success' : 'text-destructive'}`}>
-                                  {m.profit >= 0 ? '+' : ''}{formatPercentage(m.profitPercentage)}
+                                  {m.profit >= 0 ? '+' : ''}{formatCurrency(m.profit)}
                                 </p>
-                                <p className="text-xs text-muted-foreground">{formatCurrency(m.profit)}</p>
+                                <p className="text-xs text-muted-foreground">{formatPercentage(m.profitPercentage)}</p>
                               </div>
                             </div>
                           ))}

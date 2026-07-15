@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.10.0';
+export const APP_VERSION = '1.10.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.10.1',
+    date: '2026-07-15',
+    title: 'Perbaikan Urutan Papan Peringkat',
+    changes: [
+      'Diperbaiki: Papan Peringkat sebelumnya diurutkan berdasarkan persentase profit, yang selalu SAMA untuk semua anggota kalau transaksi grup dibagi proporsional sesuai modal — jadi tidak berguna untuk menentukan juara.',
+      'Sekarang diurutkan berdasarkan profit dalam Rupiah (nominal), sehingga anggota dengan kontribusi hasil terbesar benar-benar jadi peringkat 1.',
+      'Tampilan disesuaikan: nominal Rupiah jadi angka utama, persentase jadi info tambahan.',
+    ],
+  },
   {
     version: '1.10.0',
     date: '2026-07-15',
