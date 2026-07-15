@@ -12,6 +12,7 @@ import { BalanceManagementPage } from '@/pages/BalanceManagementPage';
 import { ReportsPage } from '@/pages/ReportsPage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
+import { MemberMonitorPage } from '@/pages/MemberMonitorPage';
 import { Toaster } from '@/components/ui/sonner';
 
 const queryClient = new QueryClient({
@@ -65,6 +66,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
+      <Route path="/monitor" element={<MemberMonitorPage />} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/personal" element={<PersonalFinancePage />} />

@@ -3,6 +3,35 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.11.0] - 2026-07-15
+
+### Added
+- **Ruang Anggota (Member PIN Access)** — fitur besar baru:
+  - Halaman publik **`/monitor`** — anggota grup masukkan PIN 4-8 digit
+    (tanpa perlu daftar akun/email sama sekali) untuk memantau Keuangan
+    Grup secara read-only: saldo semua anggota, papan peringkat, dan
+    riwayat transaksi grup lengkap.
+  - Admin bisa **generate/reset/nonaktifkan PIN** tiap anggota lewat ikon
+    kunci di kartu anggota (halaman Keuangan Grup).
+  - PIN di-hash dengan bcrypt (pgcrypto), tidak pernah tersimpan sebagai
+    teks biasa.
+  - Tidak ada tombol tambah/edit/hapus di mode ini — murni lihat-saja.
+
+### Database
+- Migration `20260715120000_add_member_pin_access.sql`:
+  - Kolom baru `group_members.pin_code_hash`.
+  - Fungsi `set_member_pin`, `clear_member_pin` (khusus admin/pemilik
+    grup yang login).
+  - Fungsi `verify_member_pin` (publik, dipanggil tanpa login dari
+    halaman `/monitor`).
+
+### Security Notes
+- `verify_member_pin` disengaja bersifat publik (tanpa autentikasi) agar
+  anggota tidak perlu akun. Keamanannya bergantung pada PIN yang cukup
+  acak (disarankan 6 digit, di-generate otomatis oleh sistem).
+
+---
+
 ## [1.10.1] - 2026-07-15
 
 ### Fixed

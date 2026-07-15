@@ -18,6 +18,8 @@ import {
   Eye,
   Phone,
   Wallet,
+  KeyRound,
+  Copy,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
@@ -92,6 +94,8 @@ export function GroupFinancePage() {
 
   const [showMemberForm, setShowMemberForm] = useState(false);
   const [editingMember, setEditingMember] = useState<GroupMember | null>(null);
+  const [pinDialogMember, setPinDialogMember] = useState<GroupMember | null>(null);
+  const [generatedPin, setGeneratedPin] = useState<string | null>(null);
   const [memberName, setMemberName] = useState('');
   const [memberPhone, setMemberPhone] = useState('');
   const [memberCapital, setMemberCapital] = useState(0);
@@ -282,6 +286,33 @@ export function GroupFinancePage() {
     setMemberCapital(Number(m.initial_capital));
     setShowMemberForm(true);
   }
+
+  const generatePinMut = useMutation({
+    mutationFn: async (member: GroupMember) => {
+      const pin = String(Math.floor(100000 + Math.random() * 900000)); // 6 digit
+      const { error } = await supabase.rpc('set_member_pin', { p_member_id: member.id, p_pin: pin });
+      if (error) throw error;
+      return pin;
+    },
+    onSuccess: (pin) => {
+      setGeneratedPin(pin);
+      qc.invalidateQueries({ queryKey: ['group_members'] });
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const clearPinMut = useMutation({
+    mutationFn: async (memberId: string) => {
+      const { error } = await supabase.rpc('clear_member_pin', { p_member_id: memberId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('PIN dinonaktifkan');
+      setGeneratedPin(null);
+      qc.invalidateQueries({ queryKey: ['group_members'] });
+    },
+    onError: (err) => toast.error(err.message),
+  });
   const saveMember = async () => {
     if (!selectedGroup) return;
     if (memberName.trim().length < 2) { toast.error('Nama anggota minimal 2 karakter'); return; }
@@ -686,6 +717,15 @@ export function GroupFinancePage() {
                               <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setDetailMember(m)}>
                                   <Eye className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className={`h-7 w-7 ${m.pin_code_hash ? 'text-success' : ''}`}
+                                  onClick={() => { setPinDialogMember(m); setGeneratedPin(null); }}
+                                  title={m.pin_code_hash ? 'PIN aktif — kelola akses monitoring' : 'Buat PIN akses monitoring'}
+                                >
+                                  <KeyRound className="h-3.5 w-3.5" />
                                 </Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditMember(m)}>
                                   <Pencil className="h-3.5 w-3.5" />
@@ -1099,7 +1139,60 @@ export function GroupFinancePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Transaction dialog with split preview */}
+      {/* PIN management dialog */}
+      <Dialog open={!!pinDialogMember} onOpenChange={(o) => !o && setPinDialogMember(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>PIN Akses Monitoring — {pinDialogMember?.name}</DialogTitle>
+            <DialogDescription>
+              Bagikan PIN ini ke {pinDialogMember?.name} supaya bisa memantau Keuangan Grup tanpa perlu daftar akun.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {generatedPin ? (
+              <div className="rounded-lg border border-success/20 bg-success/5 p-4 text-center">
+                <p className="text-xs text-muted-foreground">PIN Baru (catat sekarang, tidak akan tampil lagi)</p>
+                <p className="mt-1 text-3xl font-bold tracking-widest text-success">{generatedPin}</p>
+                <Button
+                  variant="outline" size="sm" className="mt-3"
+                  onClick={() => { navigator.clipboard.writeText(generatedPin); toast.success('PIN disalin'); }}
+                >
+                  <Copy className="mr-1.5 h-3.5 w-3.5" /> Salin PIN
+                </Button>
+              </div>
+            ) : pinDialogMember?.pin_code_hash ? (
+              <div className="rounded-lg border border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                PIN aktif untuk anggota ini (tersimpan aman, tidak bisa dilihat ulang). Reset kalau lupa atau ingin ganti.
+              </div>
+            ) : (
+              <div className="rounded-lg border border-border bg-muted/30 p-4 text-center text-sm text-muted-foreground">
+                Anggota ini belum punya PIN akses monitoring.
+              </div>
+            )}
+            <div className="rounded-lg border border-border p-3 text-xs text-muted-foreground">
+              Anggota buka <span className="font-mono text-foreground">{window.location.origin}/monitor</span>,
+              masukkan PIN di atas untuk melihat Keuangan Grup (read-only).
+            </div>
+          </div>
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
+            {pinDialogMember?.pin_code_hash && (
+              <Button
+                variant="outline" className="text-destructive"
+                onClick={() => pinDialogMember && clearPinMut.mutate(pinDialogMember.id)}
+                disabled={clearPinMut.isPending}
+              >
+                Nonaktifkan PIN
+              </Button>
+            )}
+            <Button
+              onClick={() => pinDialogMember && generatePinMut.mutate(pinDialogMember)}
+              disabled={generatePinMut.isPending}
+            >
+              {pinDialogMember?.pin_code_hash ? 'Reset PIN Baru' : 'Buat PIN'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={showTxDialog} onOpenChange={setShowTxDialog}>
         <DialogContent className="max-w-lg">
           <DialogHeader>

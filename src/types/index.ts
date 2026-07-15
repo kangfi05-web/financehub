@@ -52,6 +52,7 @@ export interface GroupMember {
   name: string;
   phone: string | null;
   initial_capital: number;
+  pin_code_hash: string | null;
   created_at: string;
 }
 

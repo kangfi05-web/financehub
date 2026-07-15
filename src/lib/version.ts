@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.10.1';
+export const APP_VERSION = '1.11.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.11.0',
+    date: '2026-07-15',
+    title: 'Ruang Anggota — Akses PIN Read-Only untuk Monitoring Grup',
+    changes: [
+      'Anggota grup sekarang bisa memantau Keuangan Grup TANPA perlu daftar akun/email sama sekali — cukup pakai PIN yang diberikan admin.',
+      'Halaman baru /monitor (publik): masukkan PIN 4-8 digit, langsung lihat saldo semua anggota, papan peringkat, dan riwayat transaksi grup — mode lihat-saja, tidak ada tombol tambah/edit/hapus.',
+      'Admin bisa generate/reset/nonaktifkan PIN tiap anggota lewat ikon kunci di kartu anggota (Keuangan Grup).',
+      'PIN disimpan ter-enkripsi (bcrypt), tidak pernah dalam bentuk teks biasa.',
+    ],
+  },
   {
     version: '1.10.1',
     date: '2026-07-15',
