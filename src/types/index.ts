@@ -40,6 +40,7 @@ export interface Group {
   user_id: string;
   name: string;
   description: string | null;
+  show_leaderboard: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.9.0';
+export const APP_VERSION = '1.10.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.10.0',
+    date: '2026-07-15',
+    title: 'Grafik Tren Saldo per Anggota & Papan Peringkat',
+    changes: [
+      'Grafik baru "Tren Saldo per Anggota": garis terpisah untuk tiap anggota, menunjukkan perkembangan saldo mereka dari waktu ke waktu — lebih mudah dilihat progress-nya dibanding cuma angka statis.',
+      'Papan Peringkat anggota berdasarkan persentase profit tertinggi, lengkap dengan badge juara 1/2/3.',
+      'Papan Peringkat bisa dinyalakan/dimatikan per grup lewat toggle di header grup — supaya anggota yang tidak nyaman uangnya dibanding-bandingkan bisa dimatikan oleh pemilik grup.',
+    ],
+  },
   {
     version: '1.9.0',
     date: '2026-07-15',

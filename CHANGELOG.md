@@ -3,6 +3,24 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.10.0] - 2026-07-15
+
+### Added
+- **Grafik "Tren Saldo per Anggota"** di Keuangan Grup — line chart dengan
+  garis terpisah warna-warni untuk tiap anggota, menunjukkan perkembangan
+  saldo mereka seiring waktu berdasarkan riwayat transaksi.
+- **Papan Peringkat Anggota** — mengurutkan anggota berdasarkan persentase
+  profit tertinggi, dengan badge juara 1/2/3.
+- Toggle **"🏆 Papan Peringkat"** di header grup untuk menyalakan/mematikan
+  fitur ini per grup — memberi kontrol ke pemilik grup kalau ada anggota
+  yang tidak nyaman uangnya dibanding-bandingkan secara terbuka.
+
+### Database
+- Migration `20260715100000_add_group_leaderboard_toggle.sql`: kolom baru
+  `show_leaderboard` (default `true`) pada tabel `groups`.
+
+---
+
 ## [1.9.0] - 2026-07-15
 
 ### Changed

@@ -34,7 +34,7 @@ import { StatCard } from '@/components/StatCard';
 import { EmptyState } from '@/components/EmptyState';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { CurrencyInput } from '@/components/CurrencyInput';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,6 +58,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import type { Group, GroupMember, GroupTransaction, MemberTransactionDetail } from '@/types';
 import {
@@ -65,11 +66,14 @@ import {
   Area,
   BarChart,
   Bar,
+  LineChart,
+  Line,
   Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from 'recharts';
 import { useTheme } from '@/lib/theme';
@@ -446,6 +450,60 @@ export function GroupFinancePage() {
     [memberSummaries]
   );
 
+  // Tren saldo per anggota dari waktu ke waktu: satu baris per tanggal,
+  // satu kolom per anggota (nilai saldo di-carry forward dari transaksi
+  // terakhir sampai tanggal itu).
+  const memberTrendData = useMemo(() => {
+    if (groupMembers.length === 0) return [];
+    const sorted = [...groupDetails].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+    const dates = Array.from(new Set(sorted.map((d) => formatDate(d.created_at, 'dd/MM')))).sort(
+      (a, b) => {
+        const da = sorted.find((d) => formatDate(d.created_at, 'dd/MM') === a)!.created_at;
+        const db = sorted.find((d) => formatDate(d.created_at, 'dd/MM') === b)!.created_at;
+        return new Date(da).getTime() - new Date(db).getTime();
+      }
+    );
+    if (dates.length === 0) return [];
+
+    const running: Record<string, number> = {};
+    for (const m of groupMembers) running[m.name] = Number(m.initial_capital);
+    // Mundurkan running ke titik SEBELUM transaksi pertama (pakai initial_capital),
+    // lalu jalankan maju sesuai urutan transaksi per tanggal.
+    const memberIdToName = new Map(groupMembers.map((m) => [m.id, m.name]));
+
+    return dates.map((dateLabel) => {
+      const detailsThisDate = sorted.filter((d) => formatDate(d.created_at, 'dd/MM') === dateLabel);
+      for (const d of detailsThisDate) {
+        const name = memberIdToName.get(d.member_id);
+        if (name) running[name] = Number(d.balance_after);
+      }
+      return { date: dateLabel, ...running };
+    });
+  }, [groupDetails, groupMembers]);
+
+  const memberLineColors = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--destructive))', 'hsl(var(--info))', '#f59e0b', '#a855f7', '#ec4899', '#14b8a6'];
+
+  // Papan peringkat: urutkan anggota berdasarkan profit % tertinggi.
+  const leaderboard = useMemo(
+    () => [...memberSummaries].sort((a, b) => b.profitPercentage - a.profitPercentage),
+    [memberSummaries]
+  );
+
+  const toggleLeaderboardMut = useMutation({
+    mutationFn: async () => {
+      if (!selectedGroup) return;
+      const { error } = await supabase
+        .from('groups')
+        .update({ show_leaderboard: !selectedGroup.show_leaderboard })
+        .eq('id', selectedGroup.id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['groups'] }),
+    onError: (err) => toast.error(err.message),
+  });
+
   const axisColor = isDark ? '#94a3b8' : '#64748b';
   const gridColor = isDark ? '#1e293b' : '#e2e8f0';
 
@@ -542,6 +600,14 @@ export function GroupFinancePage() {
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5">
+                      <span className="text-xs font-medium text-muted-foreground">🏆 Papan Peringkat</span>
+                      <Switch
+                        checked={selectedGroup.show_leaderboard}
+                        onCheckedChange={() => toggleLeaderboardMut.mutate()}
+                        disabled={toggleLeaderboardMut.isPending}
+                      />
+                    </div>
                     <Button variant="outline" size="sm" onClick={() => openEditGroup(selectedGroup)}>
                       <Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit Grup
                     </Button>
@@ -806,6 +872,69 @@ export function GroupFinancePage() {
                       </ResponsiveContainer>
                     </CardContent>
                   </Card>
+
+                  {memberTrendData.length > 1 && (
+                    <Card className="lg:col-span-2">
+                      <CardHeader>
+                        <CardTitle className="text-base">Tren Saldo per Anggota</CardTitle>
+                        <CardDescription>Perkembangan saldo tiap anggota dari waktu ke waktu</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={300}>
+                          <LineChart data={memberTrendData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                            <XAxis dataKey="date" tick={{ fontSize: 11, fill: axisColor }} />
+                            <YAxis tick={{ fontSize: 11, fill: axisColor }} tickFormatter={(v) => `${(v / 1000000).toFixed(1)}jt`} />
+                            <Tooltip contentStyle={{ backgroundColor: isDark ? '#1e293b' : '#fff', border: `1px solid ${gridColor}`, borderRadius: 8, fontSize: 12 }} formatter={(v: number) => formatCurrency(v)} />
+                            <Legend wrapperStyle={{ fontSize: 12 }} />
+                            {groupMembers.map((m, i) => (
+                              <Line
+                                key={m.id}
+                                type="monotone"
+                                dataKey={m.name}
+                                name={m.name}
+                                stroke={memberLineColors[i % memberLineColors.length]}
+                                strokeWidth={2}
+                                dot={{ r: 3 }}
+                                connectNulls
+                              />
+                            ))}
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {selectedGroup?.show_leaderboard && leaderboard.length > 0 && (
+                    <Card className="lg:col-span-2">
+                      <CardHeader>
+                        <CardTitle className="text-base">🏆 Papan Peringkat Anggota</CardTitle>
+                        <CardDescription>Diurutkan berdasarkan persentase profit tertinggi</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {leaderboard.map((m, i) => (
+                            <div key={m.id} className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5">
+                              <div className="flex items-center gap-3">
+                                <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
+                                  i === 0 ? 'bg-yellow-500/20 text-yellow-600' : i === 1 ? 'bg-slate-400/20 text-slate-500' : i === 2 ? 'bg-orange-500/20 text-orange-600' : 'bg-muted text-muted-foreground'
+                                }`}>
+                                  {i + 1}
+                                </span>
+                                <span className="text-sm font-medium">{m.name}</span>
+                              </div>
+                              <div className="text-right">
+                                <p className={`text-sm font-bold ${m.profit >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                  {m.profit >= 0 ? '+' : ''}{formatPercentage(m.profitPercentage)}
+                                </p>
+                                <p className="text-xs text-muted-foreground">{formatCurrency(m.profit)}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               )}
 
