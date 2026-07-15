@@ -3,6 +3,27 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.8.4] - 2026-07-15
+
+### Fixed
+- **Realtime sama sekali tidak berjalan (termasuk Dashboard yang sebelumnya
+  berfungsi).** Akar masalah: token JWT sesi login tidak dikirim eksplisit
+  ke koneksi WebSocket realtime Supabase. Karena semua tabel memakai RLS
+  (`auth.uid() = user_id`), tanpa token yang valid di sisi realtime,
+  `auth.uid()` bernilai NULL dan setiap event perubahan data ditolak secara
+  diam-diam oleh RLS — tanpa error yang terlihat di console. Data biasa
+  (lewat query manual/refresh) tetap normal karena itu memakai jalur
+  otentikasi REST API yang berbeda dan benar.
+
+### Changed
+- `useRealtimeSync` sekarang memanggil `supabase.realtime.setAuth(token)`
+  secara eksplisit sebelum channel di-subscribe, dan mengirim ulang token
+  setiap kali sesi di-refresh otomatis (event `TOKEN_REFRESHED`).
+- Nama channel realtime dibuat unik per-mount (`-${Date.now()}`) untuk
+  menghindari konflik topik saat re-render/re-mount.
+
+---
+
 ## [1.8.3] - 2026-07-14
 
 ### Fixed

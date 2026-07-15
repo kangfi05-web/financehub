@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.8.3';
+export const APP_VERSION = '1.8.4';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.8.4',
+    date: '2026-07-15',
+    title: 'Perbaikan Realtime yang Sesungguhnya (RLS Auth Token)',
+    changes: [
+      'Akar masalah realtime tidak jalan sama sekali (bukan cuma di Grup/Pribadi, tapi juga Dashboard): token login tidak dikirim eksplisit ke koneksi realtime, sehingga sistem keamanan (RLS) diam-diam menolak semua notifikasi perubahan tanpa error yang terlihat.',
+      'Sekarang token dikirim eksplisit sebelum berlangganan perubahan data, dan diperbarui otomatis tiap kali sesi login di-refresh.',
+    ],
+  },
   {
     version: '1.8.3',
     date: '2026-07-14',
