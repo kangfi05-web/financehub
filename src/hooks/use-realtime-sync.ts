@@ -48,18 +48,26 @@ export function useRealtimeSync() {
     async function setup() {
       // Kirim token JWT eksplisit ke koneksi realtime agar RLS (auth.uid())
       // bisa dievaluasi dengan benar untuk postgres_changes.
+      console.log('[realtime-sync] setting auth token, len=', accessToken?.length);
       await supabase.realtime.setAuth(accessToken!);
       if (cancelled) return;
+      console.log('[realtime-sync] auth set, creating channel for user', userId);
 
       const channel = supabase.channel(`realtime-sync-${userId}-${Date.now()}`);
       for (const table of WATCHED_TABLES) {
         channel.on(
           'postgres_changes',
           { event: '*', schema: 'public', table, filter: `user_id=eq.${userId}` },
-          () => qc.invalidateQueries({ queryKey: [table] })
+          (payload) => {
+            console.log('[realtime-sync] event received:', table, payload.eventType);
+            qc.invalidateQueries({ queryKey: [table] });
+          }
         );
       }
-      channel.subscribe((s) => setStatus(s));
+      channel.subscribe((s, err) => {
+        console.log('[realtime-sync] subscription status:', s, err ?? '');
+        setStatus(s);
+      });
 
       return channel;
     }
