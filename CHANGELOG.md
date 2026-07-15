@@ -3,6 +3,27 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.9.0] - 2026-07-15
+
+### Changed
+- **Strategi auto-refresh diubah dari full-realtime ke hybrid (realtime +
+  polling).** WebSocket realtime Supabase terbukti sulit diandalkan 100%
+  di kondisi jaringan/browser tertentu meski secara teknis sudah terhubung
+  (`SUBSCRIBED`) dan token otentikasi sudah benar. Daripada terus
+  bergantung sepenuhnya padanya, aplikasi sekarang JUGA melakukan polling
+  otomatis setiap 8 detik untuk semua data, sebagai jaminan tambahan yang
+  pasti berhasil.
+- `refetchOnWindowFocus` diaktifkan — data ikut diperbarui begitu kamu
+  kembali ke tab aplikasi.
+- `staleTime` dipersingkat dari 30 detik menjadi 5 detik.
+
+### Impact
+- Transaksi dari bot Telegram (atau sumber mana pun) sekarang akan muncul
+  otomatis di aplikasi dalam hitungan detik, tanpa perlu refresh manual —
+  terlepas dari apakah koneksi realtime berhasil atau tidak.
+
+---
+
 ## [1.8.4] - 2026-07-15
 
 ### Fixed

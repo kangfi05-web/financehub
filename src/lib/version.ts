@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.8.4';
+export const APP_VERSION = '1.9.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.9.0',
+    date: '2026-07-15',
+    title: 'Auto-refresh Terjamin (Polling), Bukan Cuma Realtime',
+    changes: [
+      'Realtime WebSocket ternyata tidak selalu bisa diandalkan sepenuhnya (tergantung jaringan/browser). Sekarang aplikasi juga otomatis memuat ulang data setiap 8 detik di latar belakang, sebagai jaminan tambahan di luar realtime.',
+      'Auto-refresh juga terjadi saat kamu kembali membuka tab aplikasi (refetch on window focus).',
+      'Hasilnya: transaksi dari bot Telegram akan muncul otomatis dalam hitungan detik, tanpa perlu refresh manual — baik realtime berhasil connect atau tidak.',
+    ],
+  },
   {
     version: '1.8.4',
     date: '2026-07-15',
