@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.8.2';
+export const APP_VERSION = '1.8.3';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.8.3',
+    date: '2026-07-14',
+    title: 'Perbaikan Login "Email/Sandi Salah" Padahal Sudah Daftar',
+    changes: [
+      'Akar masalah: Supabase mewajibkan konfirmasi email sebelum bisa login. Akun yang belum konfirmasi ditolak dengan pesan generik yang terlihat seperti "salah password", padahal bukan.',
+      'Akun yang sudah terlanjur daftar sebelumnya dikonfirmasi manual — sudah bisa langsung login.',
+      'Pesan error diperjelas untuk membedakan kasus email belum dikonfirmasi.',
+      'Rekomendasi: matikan "Confirm email" di Supabase Dashboard supaya pengguna baru bisa langsung login setelah daftar.',
+    ],
+  },
   {
     version: '1.8.2',
     date: '2026-07-14',

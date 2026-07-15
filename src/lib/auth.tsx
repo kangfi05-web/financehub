@@ -96,7 +96,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 function translateError(msg: string): string {
-  if (msg.includes('Invalid login credentials')) return 'Email atau kata sandi salah.';
+  if (msg.includes('Email not confirmed')) return 'Email kamu belum dikonfirmasi. Cek kotak masuk (atau folder spam) untuk link konfirmasi.';
+  if (msg.includes('Invalid login credentials')) return 'Email atau kata sandi salah, atau email belum dikonfirmasi. Cek kotak masuk untuk link konfirmasi kalau baru daftar.';
   if (msg.includes('User already registered')) return 'Email sudah terdaftar.';
   if (msg.includes('Password should be at least')) return 'Kata sandi minimal 6 karakter.';
   return msg;

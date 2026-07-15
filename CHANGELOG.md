@@ -3,6 +3,28 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.8.3] - 2026-07-14
+
+### Fixed
+- **Login gagal "email/sandi salah" padahal baru daftar.** Penyebabnya
+  Supabase Auth mewajibkan konfirmasi email sebelum login diizinkan.
+  Percobaan login dengan email belum terkonfirmasi ditolak dengan pesan
+  yang sama seperti kredensial salah, sehingga membingungkan.
+- Akun yang sudah terlanjur mendaftar (`babangok160@gmail.com`,
+  `hafiffdn05@gmail.com`) dikonfirmasi manual lewat database — sudah bisa
+  login sekarang.
+
+### Changed
+- Pesan error login diperjelas untuk membedakan kasus "email belum
+  dikonfirmasi" vs kredensial yang benar-benar salah.
+
+### Manual Action Recommended
+- Nonaktifkan **"Confirm email"** di Supabase Dashboard → Authentication →
+  Providers → Email, supaya pengguna baru bisa langsung login setelah
+  daftar tanpa perlu klik link konfirmasi di email.
+
+---
+
 ## [1.8.2] - 2026-07-14
 
 ### Fixed
