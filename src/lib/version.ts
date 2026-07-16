@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.11.0';
+export const APP_VERSION = '1.11.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.11.1',
+    date: '2026-07-15',
+    title: 'Perbaikan Pembuatan PIN Anggota',
+    changes: [
+      'Diperbaiki: klik "Buat PIN" tidak menghasilkan apa-apa karena fungsi database gagal menemukan fungsi enkripsi (gen_salt) — search path fungsi belum menyertakan schema tempat pgcrypto terpasang.',
+      'Sekarang pembuatan, reset, dan verifikasi PIN anggota berjalan normal.',
+    ],
+  },
   {
     version: '1.11.0',
     date: '2026-07-15',

@@ -1,43 +1,13 @@
 /*
-# FinanceHub — Member PIN Access / Monitoring Mode (v1.11.0)
+# FinanceHub — Fix PIN Functions search_path (v1.11.1)
 
-## Overview
-Menambahkan "Ruang Anggota": setiap anggota grup bisa diberi PIN unik
-(4-8 digit) oleh admin. Anggota memakai PIN itu di halaman publik
-`/monitor` (TIDAK perlu daftar akun/login email sama sekali) untuk
-melihat data Keuangan Grup secara READ-ONLY: saldo semua anggota,
-riwayat transaksi, grafik tren, dan papan peringkat.
+Bug: fungsi set_member_pin/clear_member_pin/verify_member_pin gagal
+dengan error "function gen_salt(unknown) does not exist" karena
+SET search_path = public tidak menyertakan schema `extensions`, tempat
+ekstensi pgcrypto (crypt, gen_salt) terpasang di project Supabase ini.
 
-## New Column
-- `group_members.pin_code_hash` — PIN di-hash pakai bcrypt (pgcrypto),
-  tidak pernah disimpan dalam bentuk teks biasa.
-
-## New Functions (SECURITY DEFINER)
-1. `set_member_pin(p_member_id, p_pin)` — admin (pemilik grup yang login)
-   generate/reset PIN anggota. Validasi PIN 4-8 digit angka.
-2. `clear_member_pin(p_member_id)` — admin hapus PIN anggota (menonaktifkan
-   akses monitoring anggota tsb).
-3. `verify_member_pin(p_pin)` — dipanggil TANPA autentikasi dari halaman
-   publik `/monitor`. Kalau PIN cocok, mengembalikan seluruh data grup
-   terkait (group, members, transactions, details) dalam bentuk JSON agar
-   bisa dirender read-only di client memakai fungsi kalkulasi yang sama
-   (lib/finance.ts) seperti yang dipakai admin.
-
-## Security Notes
-- PIN di-hash dengan bcrypt (pgcrypto `crypt()`), bukan plaintext.
-- `verify_member_pin` bersifat publik by design (dipanggil tanpa login) —
-  keamanannya bergantung pada PIN yang cukup acak dan tidak mudah ditebak
-  (disarankan 6 digit). Tidak ada rate-limiting di level ini; untuk
-  penggunaan grup kecil/personal ini captured risk yang wajar.
-- Fungsi admin (`set_member_pin`, `clear_member_pin`) memverifikasi
-  `auth.uid()` cocok dengan `user_id` pemilik anggota tsb sebelum mengizinkan
-  perubahan.
+Fix: tambahkan `extensions` ke search_path ketiga fungsi.
 */
-
-ALTER TABLE group_members
-  ADD COLUMN IF NOT EXISTS pin_code_hash text;
-
-CREATE INDEX IF NOT EXISTS idx_group_members_pin ON group_members(pin_code_hash) WHERE pin_code_hash IS NOT NULL;
 
 CREATE OR REPLACE FUNCTION set_member_pin(p_member_id uuid, p_pin text)
 RETURNS void
@@ -62,8 +32,6 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION set_member_pin(uuid, text) TO authenticated;
-
 CREATE OR REPLACE FUNCTION clear_member_pin(p_member_id uuid)
 RETURNS void
 LANGUAGE plpgsql
@@ -80,8 +48,6 @@ BEGIN
   UPDATE group_members SET pin_code_hash = NULL WHERE id = p_member_id;
 END;
 $$;
-
-GRANT EXECUTE ON FUNCTION clear_member_pin(uuid) TO authenticated;
 
 CREATE OR REPLACE FUNCTION verify_member_pin(p_pin text)
 RETURNS jsonb
@@ -123,5 +89,3 @@ BEGIN
   RETURN result;
 END;
 $$;
-
-GRANT EXECUTE ON FUNCTION verify_member_pin(text) TO anon, authenticated;

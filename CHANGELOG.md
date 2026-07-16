@@ -3,6 +3,19 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.11.1] - 2026-07-15
+
+### Fixed
+- **"Buat PIN" tidak menghasilkan apa-apa.** Fungsi `set_member_pin`,
+  `clear_member_pin`, dan `verify_member_pin` gagal dengan error
+  `function gen_salt(unknown) does not exist` — `SET search_path = public`
+  tidak menyertakan schema `extensions`, tempat ekstensi `pgcrypto`
+  (fungsi `crypt`/`gen_salt`) terpasang di project Supabase ini.
+- Ketiga fungsi diperbaiki (`search_path = public, extensions`). PIN
+  sekarang berhasil dibuat, di-reset, dan diverifikasi dengan benar.
+
+---
+
 ## [1.11.0] - 2026-07-15
 
 ### Added
