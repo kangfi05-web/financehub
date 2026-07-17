@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.12.0';
+export const APP_VERSION = '1.13.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.13.0',
+    date: '2026-07-16',
+    title: 'Kartu Pribadi, Donut Chart, dan Warna Konsisten per Anggota',
+    changes: [
+      'Kartu "Saldo Kamu" yang menonjol di paling atas halaman /monitor — avatar besar, saldo & profit besar, plus mini grafik tren saldo pribadi (sparkline).',
+      'Grafik donut baru "Komposisi Modal Grup": porsi kontribusi modal tiap anggota, gampang dilihat sekilas.',
+      'Setiap anggota sekarang punya warna tetap yang konsisten di semua tempat (avatar, donut chart, grafik tren) — baik di halaman admin (Keuangan Grup) maupun Ruang Anggota (/monitor).',
+    ],
+  },
   {
     version: '1.12.0',
     date: '2026-07-16',

@@ -30,6 +30,7 @@ import {
   calculateProportionalSplit,
   generateTransactionNo,
 } from '@/lib/finance';
+import { getMemberColor, stableMemberOrder } from '@/lib/member-colors';
 import { formatCurrency, formatPercentage, formatDate, todayISO } from '@/lib/format';
 import { exportToCSV, exportToExcel, exportToPDF } from '@/lib/export';
 import { StatCard } from '@/components/StatCard';
@@ -514,7 +515,7 @@ export function GroupFinancePage() {
     });
   }, [groupDetails, groupMembers]);
 
-  const memberLineColors = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--destructive))', 'hsl(var(--info))', '#f59e0b', '#a855f7', '#ec4899', '#14b8a6'];
+
 
   // Papan peringkat: urutkan anggota berdasarkan profit nominal (Rupiah)
   // tertinggi. Catatan: kalau transaksi grup dibagi proporsional sesuai
@@ -931,13 +932,13 @@ export function GroupFinancePage() {
                             <YAxis tick={{ fontSize: 11, fill: axisColor }} tickFormatter={(v) => `${(v / 1000000).toFixed(1)}jt`} />
                             <Tooltip contentStyle={{ backgroundColor: isDark ? '#1e293b' : '#fff', border: `1px solid ${gridColor}`, borderRadius: 8, fontSize: 12 }} formatter={(v: number) => formatCurrency(v)} />
                             <Legend wrapperStyle={{ fontSize: 12 }} />
-                            {groupMembers.map((m, i) => (
+                            {stableMemberOrder(groupMembers).map((m, i) => (
                               <Line
                                 key={m.id}
                                 type="monotone"
                                 dataKey={m.name}
                                 name={m.name}
-                                stroke={memberLineColors[i % memberLineColors.length]}
+                                stroke={getMemberColor(i)}
                                 strokeWidth={2}
                                 dot={{ r: 3 }}
                                 connectNulls

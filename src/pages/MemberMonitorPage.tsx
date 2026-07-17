@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { KeyRound, LogOut, TrendingUp, TrendingDown, Wallet, Users } from 'lucide-react';
+import { AreaChart, Area, PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { supabase } from '@/lib/supabase';
 import { computeGroupSummary, computeMemberSummary } from '@/lib/finance';
 import { formatCurrency, formatPercentage, formatDate } from '@/lib/format';
+import { getMemberColor, stableMemberOrder } from '@/lib/member-colors';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -69,6 +71,51 @@ export function MemberMonitorPage() {
       setActivePin(null);
       setFormError(data.error ?? 'PIN tidak valid');
     }
+  }, [data]);
+
+  // PENTING: useMemo ini harus dipanggil di sini (sebelum early return di
+  // bawah), bukan setelahnya — supaya urutan pemanggilan hooks selalu
+  // konsisten di setiap render, sesuai Rules of Hooks React. Kalau data
+  // belum siap/gagal, kembalikan nilai kosong yang aman.
+  const derived = useMemo(() => {
+    if (!data || !data.success) {
+      return {
+        groupSummary: null,
+        memberSummaries: [] as ReturnType<typeof computeMemberSummary>[],
+        orderedMembers: [] as GroupMember[],
+        myColorIndex: 0,
+        myMemberSummary: undefined as ReturnType<typeof computeMemberSummary> | undefined,
+        myTrendData: [] as { t: string; balance: number }[],
+        capitalCompositionData: [] as { name: string; value: number; color: string }[],
+      };
+    }
+    const { members, details, member_id } = data;
+    const gs = computeGroupSummary(members, details);
+    const summaries = members
+      .map((m) => computeMemberSummary(m, details))
+      .sort((a, b) => b.profit - a.profit);
+
+    // Urutan anggota yang stabil, dipakai supaya warna tiap anggota konsisten
+    // di avatar, sparkline, dan donut chart (tidak berubah-ubah antar render).
+    const ordered = stableMemberOrder(members);
+    const colorIndex = ordered.findIndex((m) => m.id === member_id);
+    const mySummary = summaries.find((m) => m.id === member_id);
+
+    // Mini grafik tren saldo pribadi (sparkline): riwayat balance_after
+    // milik anggota ini sendiri, urut kronologis.
+    const trend = [...details]
+      .filter((d) => d.member_id === member_id)
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      .map((d) => ({ t: d.created_at, balance: Number(d.balance_after) }));
+
+    // Komposisi modal grup (donut chart): porsi modal tiap anggota.
+    const capitalComposition = ordered.map((m, i) => ({
+      name: m.name,
+      value: Number(m.initial_capital),
+      color: getMemberColor(i),
+    }));
+
+    return { groupSummary: gs, memberSummaries: summaries, orderedMembers: ordered, myColorIndex: colorIndex, myMemberSummary: mySummary, myTrendData: trend, capitalCompositionData: capitalComposition };
   }, [data]);
 
   function handleSubmit(e: React.FormEvent) {
@@ -150,11 +197,20 @@ export function MemberMonitorPage() {
     );
   }
 
-  const { group, members, transactions, details, member_name } = data;
-  const groupSummary = computeGroupSummary(members, details);
-  const memberSummaries = members
-    .map((m) => computeMemberSummary(m, details))
-    .sort((a, b) => b.profit - a.profit);
+  const { group, transactions, member_name } = data;
+
+  const { groupSummary, memberSummaries, orderedMembers, myColorIndex, myMemberSummary, myTrendData, capitalCompositionData } = derived;
+
+  if (!groupSummary) {
+    // Tidak seharusnya kejadian (data.success sudah dipastikan true di titik
+    // ini), tapi dijaga untuk keamanan tipe TypeScript.
+    return null;
+  }
+
+  function colorFor(memberId: string): string {
+    const idx = orderedMembers.findIndex((m) => m.id === memberId);
+    return getMemberColor(idx < 0 ? 0 : idx);
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -180,6 +236,65 @@ export function MemberMonitorPage() {
       </header>
 
       <main className="mx-auto max-w-5xl space-y-6 px-4 py-6">
+        {myMemberSummary && (
+          <Card
+            className="animate-slide-up overflow-hidden border-2"
+            style={{ borderColor: getMemberColor(myColorIndex), animationFillMode: 'backwards' }}
+          >
+            <CardContent className="p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-xl font-bold text-white"
+                    style={{ backgroundColor: getMemberColor(myColorIndex) }}
+                  >
+                    {member_name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Saldo Kamu Saat Ini</p>
+                    <p className="text-2xl font-bold sm:text-3xl">
+                      <AnimatedNumber value={myMemberSummary.currentBalance} formatter={formatCurrency} />
+                    </p>
+                    <p className={`text-sm font-medium ${myMemberSummary.profit >= 0 ? 'text-success' : 'text-destructive'}`}>
+                      {myMemberSummary.profit >= 0 ? '+' : ''}
+                      <AnimatedNumber value={myMemberSummary.profit} formatter={formatCurrency} />
+                      {' '}({formatPercentage(myMemberSummary.profitPercentage)})
+                    </p>
+                  </div>
+                </div>
+
+                {myTrendData.length > 1 && (
+                  <div className="h-14 w-full sm:w-40">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={myTrendData} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="sparklineFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={getMemberColor(myColorIndex)} stopOpacity={0.4} />
+                            <stop offset="100%" stopColor={getMemberColor(myColorIndex)} stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <Area
+                          type="monotone"
+                          dataKey="balance"
+                          stroke={getMemberColor(myColorIndex)}
+                          strokeWidth={2}
+                          fill="url(#sparklineFill)"
+                          isAnimationActive={false}
+                        />
+                        <Tooltip
+                          formatter={(v: number) => formatCurrency(v)}
+                          labelFormatter={() => ''}
+                          contentStyle={{ fontSize: 11, padding: '4px 8px' }}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard style={{ animationDelay: '0ms' }} label="Total Modal" value={<AnimatedNumber value={groupSummary.totalCapital} formatter={formatCurrency} />} icon={Wallet} accent="info" />
           <StatCard style={{ animationDelay: '80ms' }} label="Total Pengeluaran" value={<AnimatedNumber value={groupSummary.totalExpense} formatter={formatCurrency} />} icon={TrendingDown} accent="destructive" />
@@ -200,7 +315,10 @@ export function MemberMonitorPage() {
                   style={{ animationDelay: `${Math.min(i * 60, 420)}ms`, animationFillMode: 'backwards' }}
                 >
                   <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                    <div
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-white"
+                      style={{ backgroundColor: colorFor(m.id) }}
+                    >
                       {m.name.charAt(0).toUpperCase()}
                     </div>
                     <span className="text-sm font-medium">{m.name}{m.name === member_name ? ' (kamu)' : ''}</span>
@@ -216,6 +334,52 @@ export function MemberMonitorPage() {
             </div>
           </CardContent>
         </Card>
+
+        {capitalCompositionData.length > 1 && (
+          <Card className="animate-slide-up" style={{ animationDelay: '120ms', animationFillMode: 'backwards' }}>
+            <CardHeader>
+              <CardTitle className="text-base">Komposisi Modal Grup</CardTitle>
+              <CardDescription>Porsi modal tiap anggota terhadap total modal grup</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center gap-4 sm:flex-row">
+                <div className="h-56 w-full sm:w-56 sm:shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={capitalCompositionData}
+                        dataKey="value"
+                        nameKey="name"
+                        innerRadius="55%"
+                        outerRadius="85%"
+                        paddingAngle={2}
+                        isAnimationActive
+                      >
+                        {capitalCompositionData.map((entry) => (
+                          <Cell key={entry.name} fill={entry.color} stroke="transparent" />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(v: number) => formatCurrency(v)} contentStyle={{ fontSize: 12 }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="w-full space-y-1.5">
+                  {capitalCompositionData.map((entry) => (
+                    <div key={entry.name} className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-2">
+                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                        {entry.name}
+                      </span>
+                      <span className="font-medium text-muted-foreground">
+                        {groupSummary.totalCapital > 0 ? formatPercentage((entry.value / groupSummary.totalCapital) * 100) : '0%'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {group.show_leaderboard && (
           <Card className="animate-slide-up" style={{ animationDelay: '160ms', animationFillMode: 'backwards' }}>

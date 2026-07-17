@@ -3,6 +3,36 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.13.0] - 2026-07-16
+
+### Added
+- **Kartu "Saldo Kamu"** di paling atas halaman `/monitor` — lebih besar
+  dan menonjol dari kartu lain: avatar besar berwarna, saldo & profit
+  dengan angka animasi, plus mini grafik tren (sparkline) saldo pribadi
+  dari waktu ke waktu.
+- **Donut chart "Komposisi Modal Grup"** — visualisasi porsi kontribusi
+  modal tiap anggota terhadap total modal grup.
+- **Warna konsisten per anggota** (`src/lib/member-colors.ts`, baru): satu
+  anggota selalu dapat warna yang sama di avatar, grafik tren, dan donut
+  chart — dipakai bersama di halaman admin (Keuangan Grup) maupun Ruang
+  Anggota (`/monitor`), supaya gampang dikenali sekilas tanpa baca nama.
+
+### Fixed (ditemukan & diperbaiki saat pengembangan fitur ini)
+- Perbaikan pelanggaran React "Rules of Hooks" di `MemberMonitorPage`: satu
+  `useMemo` sempat ditempatkan setelah early-return kondisional, yang bisa
+  menyebabkan urutan pemanggilan hooks tidak konsisten antar render.
+  Dipindahkan ke posisi yang benar (sebelum semua early-return) dan
+  diverifikasi bersih lewat ESLint (`react-hooks/rules-of-hooks`) serta
+  full type-check dan production build.
+
+### Notes
+- `StatCard` value type sudah `ReactNode` sejak v1.12.0 — dipakai lagi di
+  sini tanpa perubahan tambahan.
+- Tidak ada logika kalkulasi (`computeGroupSummary`, `computeMemberSummary`,
+  urutan peringkat) yang diubah pada rilis ini.
+
+---
+
 ## [1.12.0] - 2026-07-16
 
 ### Added
