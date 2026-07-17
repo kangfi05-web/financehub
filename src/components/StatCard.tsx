@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 interface StatCardProps extends HTMLAttributes<HTMLDivElement> {
   label: string;
-  value: string;
+  value: React.ReactNode;
   icon: React.ElementType;
   trend?: string;
   trendPositive?: boolean;

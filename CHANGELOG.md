@@ -3,6 +3,32 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.12.0] - 2026-07-16
+
+### Added
+- **Angka animasi (AnimatedNumber)** — nilai saldo, profit, dan total di
+  halaman `/monitor` (Ruang Anggota) sekarang menghitung naik/turun secara
+  halus (ease-out) tiap kali datanya berubah, bukan langsung ganti statis.
+  Otomatis nonaktif kalau pengguna mengaktifkan "prefers-reduced-motion".
+- **Indikator live** di header `/monitor`: titik hijau berkedip + teks
+  "Update X detik lalu", menunjukkan data memang diperbarui otomatis.
+- **Animasi masuk bertahap** — kartu-kartu (ringkasan, saldo anggota,
+  papan peringkat, riwayat) muncul fade-in dari bawah secara berurutan
+  saat halaman dibuka, memakai animasi `slide-up` yang sudah ada di
+  desain sistem (tidak menambah animasi baru).
+
+### Notes
+- Perubahan ini murni visual/kosmetik pada halaman `/monitor`. Logika
+  perhitungan (`computeGroupSummary`, `computeMemberSummary`, urutan
+  papan peringkat) tidak disentuh sama sekali — sudah diverifikasi lewat
+  build & type-check penuh tanpa error.
+- `StatCard` kini menerima `value` sebagai `ReactNode` (sebelumnya
+  `string`) agar bisa menampung komponen angka animasi; perubahan ini
+  backward-compatible karena string tetap valid `ReactNode`, dipastikan
+  tidak memengaruhi pemakaian `StatCard` di halaman lain.
+
+---
+
 ## [1.11.1] - 2026-07-15
 
 ### Fixed

@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.11.1';
+export const APP_VERSION = '1.12.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.12.0',
+    date: '2026-07-16',
+    title: 'Ruang Anggota Lebih Enak Dipandang',
+    changes: [
+      'Angka saldo, profit, dan total di halaman /monitor sekarang animasi menghitung naik/turun secara halus, bukan langsung berubah statis.',
+      'Indikator "live" berkedip di header /monitor menunjukkan kapan data terakhir diperbarui otomatis.',
+      'Kartu-kartu di /monitor muncul bertahap (fade-in dari bawah) saat halaman dibuka, urut dari atas ke bawah.',
+      'Semua perubahan murni visual — logika perhitungan saldo/profit/peringkat tidak diubah sama sekali.',
+    ],
+  },
   {
     version: '1.11.1',
     date: '2026-07-15',

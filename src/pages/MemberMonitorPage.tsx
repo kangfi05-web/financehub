@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { StatCard } from '@/components/StatCard';
+import { AnimatedNumber } from '@/components/AnimatedNumber';
 import { EmptyState } from '@/components/EmptyState';
 import type { GroupMember, GroupTransaction, MemberTransactionDetail } from '@/types';
 
@@ -38,12 +39,29 @@ export function MemberMonitorPage() {
   const [activePin, setActivePin] = useState<string | null>(() => sessionStorage.getItem(SESSION_KEY));
   const [formError, setFormError] = useState('');
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, dataUpdatedAt, isFetching } = useQuery({
     queryKey: ['member-monitor', activePin],
     queryFn: () => fetchMonitorData(activePin!),
     enabled: !!activePin,
     retry: false,
   });
+
+  // Ticker khusus tampilan "X detik lalu" — TIDAK memengaruhi jadwal
+  // polling react-query sama sekali, cuma dipakai untuk render ulang teks.
+  const [, setClockTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setClockTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  function secondsAgoLabel(updatedAt: number): string {
+    if (!updatedAt) return '';
+    const secs = Math.max(0, Math.floor((Date.now() - updatedAt) / 1000));
+    if (secs < 3) return 'baru saja';
+    if (secs < 60) return `${secs} detik lalu`;
+    const mins = Math.floor(secs / 60);
+    return `${mins} menit lalu`;
+  }
 
   useEffect(() => {
     if (data && !data.success) {
@@ -146,30 +164,40 @@ export function MemberMonitorPage() {
             <p className="text-xs text-muted-foreground">Ruang Anggota - Halo, {member_name}</p>
             <h1 className="text-lg font-bold">{group.name}</h1>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout}>
-            <LogOut className="mr-1.5 h-3.5 w-3.5" /> Keluar
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex">
+              <span className="relative flex h-2 w-2">
+                <span className={`absolute inline-flex h-full w-full rounded-full bg-success opacity-75 ${isFetching ? 'animate-ping' : ''}`} />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+              </span>
+              {isFetching ? 'Memperbarui...' : `Update ${secondsAgoLabel(dataUpdatedAt)}`}
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <LogOut className="mr-1.5 h-3.5 w-3.5" /> Keluar
+            </Button>
+          </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-5xl space-y-6 px-4 py-6">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard label="Total Modal" value={formatCurrency(groupSummary.totalCapital)} icon={Wallet} accent="info" />
-          <StatCard label="Total Pengeluaran" value={formatCurrency(groupSummary.totalExpense)} icon={TrendingDown} accent="destructive" />
-          <StatCard label="Total Pemasukan" value={formatCurrency(groupSummary.totalIncome)} icon={TrendingUp} accent="success" />
-          <StatCard label="Profit Grup" value={formatCurrency(groupSummary.profit)} icon={TrendingUp} accent={groupSummary.profit >= 0 ? 'success' : 'destructive'} />
+          <StatCard style={{ animationDelay: '0ms' }} label="Total Modal" value={<AnimatedNumber value={groupSummary.totalCapital} formatter={formatCurrency} />} icon={Wallet} accent="info" />
+          <StatCard style={{ animationDelay: '80ms' }} label="Total Pengeluaran" value={<AnimatedNumber value={groupSummary.totalExpense} formatter={formatCurrency} />} icon={TrendingDown} accent="destructive" />
+          <StatCard style={{ animationDelay: '160ms' }} label="Total Pemasukan" value={<AnimatedNumber value={groupSummary.totalIncome} formatter={formatCurrency} />} icon={TrendingUp} accent="success" />
+          <StatCard style={{ animationDelay: '240ms' }} label="Profit Grup" value={<AnimatedNumber value={groupSummary.profit} formatter={formatCurrency} />} icon={TrendingUp} accent={groupSummary.profit >= 0 ? 'success' : 'destructive'} />
         </div>
 
-        <Card>
+        <Card className="animate-slide-up" style={{ animationDelay: '80ms', animationFillMode: 'backwards' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base"><Users className="h-4 w-4" /> Saldo Anggota</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {memberSummaries.map((m) => (
+              {memberSummaries.map((m, i) => (
                 <div
                   key={m.id}
-                  className={`flex items-center justify-between rounded-lg border px-3 py-2.5 ${m.name === member_name ? 'border-primary/40 bg-primary/5' : 'border-border'}`}
+                  className={`flex animate-slide-up items-center justify-between rounded-lg border px-3 py-2.5 ${m.name === member_name ? 'border-primary/40 bg-primary/5' : 'border-border'}`}
+                  style={{ animationDelay: `${Math.min(i * 60, 420)}ms`, animationFillMode: 'backwards' }}
                 >
                   <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
@@ -178,9 +206,9 @@ export function MemberMonitorPage() {
                     <span className="text-sm font-medium">{m.name}{m.name === member_name ? ' (kamu)' : ''}</span>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold">{formatCurrency(m.currentBalance)}</p>
+                    <p className="text-sm font-bold"><AnimatedNumber value={m.currentBalance} formatter={formatCurrency} /></p>
                     <p className={`text-xs ${m.profit >= 0 ? 'text-success' : 'text-destructive'}`}>
-                      {m.profit >= 0 ? '+' : ''}{formatCurrency(m.profit)} ({formatPercentage(m.profitPercentage)})
+                      {m.profit >= 0 ? '+' : ''}<AnimatedNumber value={m.profit} formatter={formatCurrency} /> ({formatPercentage(m.profitPercentage)})
                     </p>
                   </div>
                 </div>
@@ -190,7 +218,7 @@ export function MemberMonitorPage() {
         </Card>
 
         {group.show_leaderboard && (
-          <Card>
+          <Card className="animate-slide-up" style={{ animationDelay: '160ms', animationFillMode: 'backwards' }}>
             <CardHeader>
               <CardTitle className="text-base">Papan Peringkat</CardTitle>
               <CardDescription>Diurutkan berdasarkan profit tertinggi</CardDescription>
@@ -198,7 +226,11 @@ export function MemberMonitorPage() {
             <CardContent>
               <div className="space-y-2">
                 {memberSummaries.map((m, i) => (
-                  <div key={m.id} className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5">
+                  <div
+                    key={m.id}
+                    className="flex animate-slide-up items-center justify-between rounded-lg border border-border px-3 py-2.5"
+                    style={{ animationDelay: `${Math.min(i * 60, 420)}ms`, animationFillMode: 'backwards' }}
+                  >
                     <div className="flex items-center gap-3">
                       <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
                         i === 0 ? 'bg-yellow-500/20 text-yellow-600' : i === 1 ? 'bg-slate-400/20 text-slate-500' : i === 2 ? 'bg-orange-500/20 text-orange-600' : 'bg-muted text-muted-foreground'
@@ -208,7 +240,7 @@ export function MemberMonitorPage() {
                       <span className="text-sm font-medium">{m.name}</span>
                     </div>
                     <p className={`text-sm font-bold ${m.profit >= 0 ? 'text-success' : 'text-destructive'}`}>
-                      {m.profit >= 0 ? '+' : ''}{formatCurrency(m.profit)}
+                      {m.profit >= 0 ? '+' : ''}<AnimatedNumber value={m.profit} formatter={formatCurrency} />
                     </p>
                   </div>
                 ))}
@@ -217,7 +249,7 @@ export function MemberMonitorPage() {
           </Card>
         )}
 
-        <Card>
+        <Card className="animate-slide-up" style={{ animationDelay: '240ms', animationFillMode: 'backwards' }}>
           <CardHeader>
             <CardTitle className="text-base">Riwayat Transaksi Grup</CardTitle>
           </CardHeader>
