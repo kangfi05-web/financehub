@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.13.0';
+export const APP_VERSION = '1.14.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.14.0',
+    date: '2026-07-16',
+    title: 'Pendaftaran Publik Join Grup + Notifikasi Telegram',
+    changes: [
+      'Halaman depan baru (/welcome): pilih "Saya Admin" (login seperti biasa) atau "Join Grup" (daftar sebagai calon anggota, tanpa perlu akun).',
+      'Form Join Grup publik (/join): nama, alamat, NIK, no HP aktif, dan grup yang diminati.',
+      'Setiap pendaftaran baru otomatis mengirim notifikasi ke Telegram admin, lengkap dengan detail pendaftar.',
+      'Halaman admin baru "Permintaan Bergabung": lihat semua pendaftar, tandai status (sudah dihubungi/diterima/ditolak), lalu tambahkan sebagai anggota grup dan generate PIN lewat fitur yang sudah ada.',
+      'Data NIK dan data pribadi lain hanya bisa dibaca admin yang login — tidak pernah publik.',
+    ],
+  },
   {
     version: '1.13.0',
     date: '2026-07-16',

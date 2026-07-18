@@ -166,3 +166,17 @@ export interface MemberWithdrawalSettings {
   created_at: string;
   updated_at: string;
 }
+
+export type JoinRequestStatus = 'pending' | 'contacted' | 'approved' | 'rejected';
+
+export interface GroupJoinRequest {
+  id: string;
+  full_name: string;
+  address: string;
+  nik: string;
+  phone: string;
+  requested_group: string | null;
+  status: JoinRequestStatus;
+  admin_notes: string | null;
+  created_at: string;
+}

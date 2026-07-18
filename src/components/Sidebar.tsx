@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard,
   User,
@@ -14,12 +15,14 @@ import {
   Moon,
   Sun,
   LogOut,
+  UserPlus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const navItems = [
@@ -29,6 +32,7 @@ const navItems = [
   { to: '/balance', label: 'Manajemen Saldo', icon: ArrowLeftRight },
   { to: '/reports', label: 'Laporan', icon: FileBarChart },
   { to: '/history', label: 'Riwayat Transaksi', icon: History },
+  { to: '/join-requests', label: 'Permintaan Bergabung', icon: UserPlus },
   { to: '/settings', label: 'Pengaturan', icon: Settings },
 ];
 
@@ -37,6 +41,18 @@ export function Sidebar() {
   const location = useLocation();
   const { profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+
+  const { data: pendingJoinCount = 0 } = useQuery({
+    queryKey: ['group_join_requests', 'pending_count'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('group_join_requests')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
 
   const initials = profile?.full_name
     ? profile.full_name
@@ -67,7 +83,12 @@ export function Sidebar() {
             }
           >
             <Icon className="h-[18px] w-[18px] shrink-0" />
-            <span>{item.label}</span>
+            <span className="flex-1">{item.label}</span>
+            {item.to === '/join-requests' && pendingJoinCount > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                {pendingJoinCount}
+              </span>
+            )}
           </NavLink>
         );
       })}

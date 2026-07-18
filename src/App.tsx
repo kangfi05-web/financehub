@@ -13,6 +13,9 @@ import { ReportsPage } from '@/pages/ReportsPage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { MemberMonitorPage } from '@/pages/MemberMonitorPage';
+import { WelcomePage } from '@/pages/WelcomePage';
+import { JoinGroupPage } from '@/pages/JoinGroupPage';
+import { JoinRequestsPage } from '@/pages/JoinRequestsPage';
 import { Toaster } from '@/components/ui/sonner';
 
 const queryClient = new QueryClient({
@@ -43,7 +46,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   }
 
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to="/welcome" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
@@ -65,7 +68,9 @@ function PublicRoute({ children }: { children: ReactNode }) {
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/welcome" element={<PublicRoute><WelcomePage /></PublicRoute>} />
       <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
+      <Route path="/join" element={<JoinGroupPage />} />
       <Route path="/monitor" element={<MemberMonitorPage />} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/" element={<DashboardPage />} />
@@ -74,6 +79,7 @@ function AppRoutes() {
         <Route path="/balance" element={<BalanceManagementPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/history" element={<HistoryPage />} />
+        <Route path="/join-requests" element={<JoinRequestsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

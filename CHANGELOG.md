@@ -3,6 +3,42 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.14.0] - 2026-07-16
+
+### Added
+- **Halaman depan baru `/welcome`** — pintu masuk publik dengan 2 pilihan:
+  "Saya Admin" (ke halaman login) atau "Join Grup" (ke form pendaftaran).
+  Route terlindungi (`ProtectedRoute`) sekarang mengarahkan pengunjung yang
+  belum login ke sini, bukan langsung ke `/auth`.
+- **Form pendaftaran publik `/join`** — tanpa perlu akun: Nama Lengkap,
+  Alamat, NIK (16 digit, tervalidasi), No HP Aktif, dan Grup yang Diminati
+  (opsional).
+- **Notifikasi Telegram otomatis** ke admin setiap ada pendaftaran baru,
+  via Edge Function baru `notify-join-request` — lengkap nama, alamat,
+  NIK, no HP, dan minat grup.
+- **Halaman admin "Permintaan Bergabung"** (`/join-requests`, terlindungi
+  login) — daftar semua pendaftar dengan badge jumlah permintaan baru di
+  Sidebar, NIK disamarkan by default (bisa di-reveal), tombol tandai
+  status (Sudah Dihubungi / Diterima / Ditolak) dan hapus.
+
+### Database
+- Migration `20260716100000_add_group_join_requests.sql`: tabel baru
+  `group_join_requests`. INSERT publik (anon), tapi SELECT/UPDATE/DELETE
+  hanya untuk user yang login (admin) — NIK dan data pribadi lain tidak
+  pernah bisa diakses publik.
+
+### Notes
+- Alur PIN untuk anggota (generate/reset/kelola) tetap memakai fitur yang
+  sudah ada di Keuangan Grup — belum diotomatisasi penuh dari halaman
+  Permintaan Bergabung, admin masih menambahkan anggota & generate PIN
+  secara manual setelah meninjau pendaftaran (disengaja, supaya admin
+  tetap mengontrol siapa yang benar-benar ditambahkan ke grup mana).
+- URL Edge Function di `JoinGroupPage` memakai `supabase.functions.invoke()`
+  (bukan URL hardcoded) supaya tidak rawan putus kalau project Supabase
+  berpindah di kemudian hari.
+
+---
+
 ## [1.13.0] - 2026-07-16
 
 ### Added
