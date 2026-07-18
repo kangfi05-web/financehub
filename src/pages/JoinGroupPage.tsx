@@ -27,29 +27,30 @@ export function JoinGroupPage() {
 
   const submitMut = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase
-        .from('group_join_requests')
-        .insert({
-          full_name: form.full_name.trim(),
-          address: form.address.trim(),
-          nik: form.nik.trim(),
-          phone: form.phone.trim(),
-          requested_group: form.requested_group.trim() || null,
-        })
-        .select()
-        .single();
+      // Generate id di sisi client supaya tidak perlu SELECT balik ke
+      // database setelah insert (anon sengaja tidak diberi izin baca data
+      // pendaftar orang lain — hanya admin yang login yang boleh).
+      const requestId = crypto.randomUUID();
+      const { error } = await supabase.from('group_join_requests').insert({
+        id: requestId,
+        full_name: form.full_name.trim(),
+        address: form.address.trim(),
+        nik: form.nik.trim(),
+        phone: form.phone.trim(),
+        requested_group: form.requested_group.trim() || null,
+      });
       if (error) throw error;
 
       // Kirim notifikasi Telegram ke admin — kalau gagal, tidak menggagalkan
       // pendaftaran (data sudah aman tersimpan).
       try {
         await supabase.functions.invoke('notify-join-request', {
-          body: { request_id: data.id },
+          body: { request_id: requestId },
         });
       } catch {
         // diamkan, tidak kritikal untuk UX pendaftar
       }
-      return data;
+      return requestId;
     },
     onSuccess: () => setSubmitted(true),
   });

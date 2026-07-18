@@ -3,6 +3,29 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.14.1] - 2026-07-18
+
+### Fixed
+- **Form `/join` gagal terkirim** ("Gagal mengirim, coba lagi."). Root
+  cause: `.select().single()` dipanggil setelah INSERT untuk mengambil
+  `id` baris baru, tapi role `anon` (pengunjung publik tanpa login)
+  sengaja tidak diberi kebijakan RLS SELECT pada `group_join_requests`
+  (demi privasi NIK & data pribadi pendaftar lain). PostgREST melaporkan
+  ini sebagai error "new row violates row-level security policy" — bukan
+  karena INSERT-nya gagal, tapi RETURNING-nya yang diblokir RLS.
+- Fix: `id` permintaan sekarang di-generate di sisi client
+  (`crypto.randomUUID()`) sebelum INSERT, sehingga tidak perlu membaca
+  balik hasilnya dari database. Kebijakan RLS SELECT untuk `anon` TETAP
+  tidak diberikan (privasi data pendaftar tetap terjaga).
+
+### Verified
+- Dikonfirmasi ulang: `ProtectedRoute` sudah mengarahkan pengunjung yang
+  belum login dari `/` ke `/welcome` secara otomatis sejak v1.14.0 — tidak
+  ada perubahan tambahan diperlukan untuk menjadikan `/welcome` "halaman
+  utama".
+
+---
+
 ## [1.14.0] - 2026-07-16
 
 ### Added

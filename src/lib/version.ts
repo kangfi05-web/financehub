@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.14.0';
+export const APP_VERSION = '1.14.1';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.14.1',
+    date: '2026-07-18',
+    title: 'Perbaikan Form Join Grup: "Gagal Mengirim"',
+    changes: [
+      'Diperbaiki: form pendaftaran /join gagal terkirim ("Gagal mengirim, coba lagi"). Penyebabnya kode sempat minta baca-balik data setelah simpan, padahal pengunjung anonim sengaja tidak diizinkan membaca data pendaftar (demi privasi NIK & data pribadi lain).',
+      'ID pendaftaran sekarang dibuat di perangkat pengunjung sebelum dikirim, jadi tidak perlu baca balik ke database — pendaftaran langsung berhasil tersimpan dan notifikasi Telegram tetap terkirim normal.',
+      'Dikonfirmasi: /welcome otomatis jadi halaman pertama yang dilihat pengunjung yang belum login membuka alamat utama — tidak perlu bagikan link /welcome secara terpisah.',
+    ],
+  },
   {
     version: '1.14.0',
     date: '2026-07-16',
