@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.14.1';
+export const APP_VERSION = '1.15.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.15.0',
+    date: '2026-07-18',
+    title: 'Kunci Akses Admin — Hanya Pemilik Utama',
+    changes: [
+      'Ditemukan: 4 akun lain (selain akun utama) ternyata punya akses admin penuh karena sempat daftar sebelum ada pembatasan. Keempatnya sudah dihapus.',
+      'Halaman login sekarang cuma bisa "Masuk" — opsi "Daftar" dihapus total dari tampilan.',
+      'Direkomendasikan: matikan juga "Allow new users to sign up" di Supabase Dashboard supaya tidak ada yang bisa bikin akun admin baru lewat jalur mana pun, selamanya.',
+    ],
+  },
   {
     version: '1.14.1',
     date: '2026-07-18',

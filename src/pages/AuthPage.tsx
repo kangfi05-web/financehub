@@ -14,48 +14,30 @@ const signInSchema = z.object({
   password: z.string().min(6, 'Kata sandi minimal 6 karakter'),
 });
 
-const signUpSchema = signInSchema.extend({
-  full_name: z.string().min(2, 'Nama minimal 2 karakter'),
-});
-
 type SignInForm = z.infer<typeof signInSchema>;
-type SignUpForm = z.infer<typeof signUpSchema>;
 
 export function AuthPage() {
-  const { signIn, signUp } = useAuth();
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const { signIn } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
-    reset,
     formState: { errors },
-  } = useForm<SignInForm & Partial<SignUpForm>>({
-    resolver: zodResolver(mode === 'login' ? signInSchema : signUpSchema),
+  } = useForm<SignInForm>({
+    resolver: zodResolver(signInSchema),
   });
 
   const onSubmit = handleSubmit(async (data) => {
     setLoading(true);
     try {
-      if (mode === 'login') {
-        const { error } = await signIn(data.email, data.password);
-        if (error) toast.error(error);
-        else toast.success('Berhasil masuk!');
-      } else {
-        const { error } = await signUp(data.email, data.password, data.full_name!);
-        if (error) toast.error(error);
-        else toast.success('Akun berhasil dibuat! Selamat datang.');
-      }
+      const { error } = await signIn(data.email, data.password);
+      if (error) toast.error(error);
+      else toast.success('Berhasil masuk!');
     } finally {
       setLoading(false);
     }
   });
-
-  const switchMode = (newMode: 'login' | 'register') => {
-    setMode(newMode);
-    reset();
-  };
 
   return (
     <div className="flex min-h-screen">
@@ -115,25 +97,10 @@ export function AuthPage() {
             </div>
           </div>
 
-          <h2 className="text-2xl font-bold tracking-tight">
-            {mode === 'login' ? 'Selamat datang kembali' : 'Buat akun baru'}
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {mode === 'login'
-              ? 'Masuk untuk mengelola keuangan Anda'
-              : 'Daftar untuk mulai mengelola keuangan bisnis Anda'}
-          </p>
+          <h2 className="text-2xl font-bold tracking-tight">Selamat datang kembali</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Masuk untuk mengelola keuangan Anda</p>
 
           <form onSubmit={onSubmit} className="mt-8 space-y-4">
-            {mode === 'register' && (
-              <div className="space-y-1.5">
-                <Label htmlFor="full_name">Nama Lengkap</Label>
-                <Input id="full_name" placeholder="John Doe" {...register('full_name')} />
-                {errors.full_name && (
-                  <p className="text-xs text-destructive">{errors.full_name.message}</p>
-                )}
-              </div>
-            )}
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" placeholder="email@contoh.com" {...register('email')} />
@@ -148,20 +115,14 @@ export function AuthPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Memproses...' : mode === 'login' ? 'Masuk' : 'Daftar'}
+              {loading ? 'Memproses...' : 'Masuk'}
               {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === 'login' ? 'Belum punya akun? ' : 'Sudah punya akun? '}
-            <button
-              type="button"
-              onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
-              className="font-semibold text-primary hover:underline"
-            >
-              {mode === 'login' ? 'Daftar di sini' : 'Masuk di sini'}
-            </button>
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            Halaman ini khusus untuk admin pemilik aplikasi. Ingin bergabung sebagai anggota grup?{' '}
+            <a href="/welcome" className="font-semibold text-primary hover:underline">Kembali ke halaman utama</a>
           </p>
         </div>
       </div>

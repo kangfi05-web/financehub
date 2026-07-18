@@ -3,6 +3,27 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.15.0] - 2026-07-18
+
+### Security
+- **Ditemukan celah:** karena aplikasi ini didesain single-admin (bukan
+  multi-tenant per-user), 4 akun lain yang sempat mendaftar sebelum ada
+  pembatasan (`hafiffdn05@gmail.com`, `babangok160@gmail.com`,
+  `hafififdnshop@gmail.com`, `gunawan.skr@gmail.com`) ternyata punya akses
+  penuh ke SEMUA data admin (grup, transaksi, dll), bukan cuma data
+  mereka sendiri. Keempatnya sudah dihapus dari database.
+- **`AuthPage` disederhanakan jadi login-only** — opsi "Daftar di sini"
+  dan seluruh alur sign-up dihapus total dari antarmuka. Halaman ini
+  sekarang murni untuk admin pemilik masuk, bukan mendaftar.
+
+### Manual Action Recommended
+- Matikan **"Allow new users to sign up"** di Supabase Dashboard →
+  Authentication → Sign In/Providers → User Signups. Ini penegakan di
+  level backend (bukan cuma UI) yang memastikan tidak ada jalur apa pun
+  untuk membuat akun admin baru ke depannya.
+
+---
+
 ## [1.14.1] - 2026-07-18
 
 ### Fixed
