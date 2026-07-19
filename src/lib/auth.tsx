@@ -11,6 +11,8 @@ interface AuthContextValue {
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -88,8 +90,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
   }
 
+  async function resetPassword(email: string) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) return { error: translateError(error.message) };
+    return { error: null };
+  }
+
+  async function updatePassword(newPassword: string) {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) return { error: translateError(error.message) };
+    return { error: null };
+  }
+
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, signUp, signIn, signOut, resetPassword, updatePassword }}>
       {children}
     </AuthContext.Provider>
   );
@@ -100,6 +116,9 @@ function translateError(msg: string): string {
   if (msg.includes('Invalid login credentials')) return 'Email atau kata sandi salah, atau email belum dikonfirmasi. Cek kotak masuk untuk link konfirmasi kalau baru daftar.';
   if (msg.includes('User already registered')) return 'Email sudah terdaftar.';
   if (msg.includes('Password should be at least')) return 'Kata sandi minimal 6 karakter.';
+  if (msg.includes('same_password') || msg.includes('should be different')) return 'Kata sandi baru harus berbeda dari yang lama.';
+  if (msg.includes('rate limit') || msg.includes('Email rate limit')) return 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.';
+  if (msg.includes('Auth session missing')) return 'Sesi reset password sudah kedaluwarsa. Minta link baru.';
   return msg;
 }
 

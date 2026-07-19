@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.15.0';
+export const APP_VERSION = '1.16.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.16.0',
+    date: '2026-07-18',
+    title: 'Fitur Lupa Kata Sandi untuk Admin',
+    changes: [
+      'Karena pendaftaran admin baru sudah dikunci total, ditambahkan jalur resmi kalau admin lupa kata sandi: link "Lupa kata sandi?" di halaman Masuk.',
+      'Alurnya: masukkan email → link reset dikirim ke email → klik link → atur kata sandi baru di halaman /reset-password.',
+      'Kalau email pengiriman gagal/telat (sempat jadi masalah sebelumnya di project ini), tetap ada jalur cadangan: hubungi lewat sesi chat ini untuk reset manual via database.',
+    ],
+  },
   {
     version: '1.15.0',
     date: '2026-07-18',

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Wallet, TrendingUp, Users, ArrowRight } from 'lucide-react';
+import { Wallet, TrendingUp, Users, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,11 +14,18 @@ const signInSchema = z.object({
   password: z.string().min(6, 'Kata sandi minimal 6 karakter'),
 });
 
+const forgotSchema = z.object({
+  email: z.string().email('Email tidak valid'),
+});
+
 type SignInForm = z.infer<typeof signInSchema>;
+type ForgotForm = z.infer<typeof forgotSchema>;
 
 export function AuthPage() {
-  const { signIn } = useAuth();
+  const { signIn, resetPassword } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<'login' | 'forgot'>('login');
+  const [forgotSent, setForgotSent] = useState(false);
 
   const {
     register,
@@ -28,12 +35,31 @@ export function AuthPage() {
     resolver: zodResolver(signInSchema),
   });
 
+  const {
+    register: registerForgot,
+    handleSubmit: handleSubmitForgot,
+    formState: { errors: forgotErrors },
+  } = useForm<ForgotForm>({
+    resolver: zodResolver(forgotSchema),
+  });
+
   const onSubmit = handleSubmit(async (data) => {
     setLoading(true);
     try {
       const { error } = await signIn(data.email, data.password);
       if (error) toast.error(error);
       else toast.success('Berhasil masuk!');
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  const onSubmitForgot = handleSubmitForgot(async (data) => {
+    setLoading(true);
+    try {
+      const { error } = await resetPassword(data.email);
+      if (error) toast.error(error);
+      else setForgotSent(true);
     } finally {
       setLoading(false);
     }
@@ -97,33 +123,84 @@ export function AuthPage() {
             </div>
           </div>
 
-          <h2 className="text-2xl font-bold tracking-tight">Selamat datang kembali</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Masuk untuk mengelola keuangan Anda</p>
+          {mode === 'login' ? (
+            <>
+              <h2 className="text-2xl font-bold tracking-tight">Selamat datang kembali</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Masuk untuk mengelola keuangan Anda</p>
 
-          <form onSubmit={onSubmit} className="mt-8 space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="email@contoh.com" {...register('email')} />
-              {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Kata Sandi</Label>
-              <Input id="password" type="password" placeholder="••••••••" {...register('password')} />
-              {errors.password && (
-                <p className="text-xs text-destructive">{errors.password.message}</p>
-              )}
-            </div>
+              <form onSubmit={onSubmit} className="mt-8 space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" placeholder="email@contoh.com" {...register('email')} />
+                  {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Kata Sandi</Label>
+                    <button
+                      type="button"
+                      onClick={() => setMode('forgot')}
+                      className="text-xs font-medium text-primary hover:underline"
+                    >
+                      Lupa kata sandi?
+                    </button>
+                  </div>
+                  <Input id="password" type="password" placeholder="••••••••" {...register('password')} />
+                  {errors.password && (
+                    <p className="text-xs text-destructive">{errors.password.message}</p>
+                  )}
+                </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Memproses...' : 'Masuk'}
-              {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
-            </Button>
-          </form>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Memproses...' : 'Masuk'}
+                  {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
+              </form>
 
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            Halaman ini khusus untuk admin pemilik aplikasi. Ingin bergabung sebagai anggota grup?{' '}
-            <a href="/welcome" className="font-semibold text-primary hover:underline">Kembali ke halaman utama</a>
-          </p>
+              <p className="mt-6 text-center text-xs text-muted-foreground">
+                Halaman ini khusus untuk admin pemilik aplikasi. Ingin bergabung sebagai anggota grup?{' '}
+                <a href="/welcome" className="font-semibold text-primary hover:underline">Kembali ke halaman utama</a>
+              </p>
+            </>
+          ) : forgotSent ? (
+            <>
+              <button
+                type="button"
+                onClick={() => { setMode('login'); setForgotSent(false); }}
+                className="mb-4 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" /> Kembali ke Masuk
+              </button>
+              <h2 className="text-2xl font-bold tracking-tight">Cek Email Kamu</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Kalau email itu terdaftar, link untuk atur ulang kata sandi sudah dikirim. Cek kotak masuk (dan folder
+                spam). Link berlaku sekitar 1 jam.
+              </p>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setMode('login')}
+                className="mb-4 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" /> Kembali ke Masuk
+              </button>
+              <h2 className="text-2xl font-bold tracking-tight">Lupa Kata Sandi</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Masukkan email akun admin kamu, kami kirim link untuk atur ulang.</p>
+
+              <form onSubmit={onSubmitForgot} className="mt-8 space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="forgot-email">Email</Label>
+                  <Input id="forgot-email" type="email" placeholder="email@contoh.com" {...registerForgot('email')} />
+                  {forgotErrors.email && <p className="text-xs text-destructive">{forgotErrors.email.message}</p>}
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Mengirim...' : 'Kirim Link Reset'}
+                </Button>
+              </form>
+            </>
+          )}
         </div>
       </div>
     </div>

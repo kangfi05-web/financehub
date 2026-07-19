@@ -16,6 +16,7 @@ import { MemberMonitorPage } from '@/pages/MemberMonitorPage';
 import { WelcomePage } from '@/pages/WelcomePage';
 import { JoinGroupPage } from '@/pages/JoinGroupPage';
 import { JoinRequestsPage } from '@/pages/JoinRequestsPage';
+import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 import { Toaster } from '@/components/ui/sonner';
 
 const queryClient = new QueryClient({
@@ -70,6 +71,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/welcome" element={<PublicRoute><WelcomePage /></PublicRoute>} />
       <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/join" element={<JoinGroupPage />} />
       <Route path="/monitor" element={<MemberMonitorPage />} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

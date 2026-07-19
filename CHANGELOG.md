@@ -3,6 +3,30 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.16.0] - 2026-07-18
+
+### Added
+- **Lupa Kata Sandi** untuk admin — sejak pendaftaran admin baru dikunci
+  total (v1.15.0), perlu jalur resmi kalau lupa sandi:
+  - Link "Lupa kata sandi?" di halaman Masuk (`/auth`).
+  - Masukkan email → Supabase kirim link reset → klik link → diarahkan
+    ke halaman baru `/reset-password` untuk atur kata sandi baru.
+  - `AuthContext` mendapat fungsi baru `resetPassword` dan
+    `updatePassword`.
+  - Pesan error diperluas untuk kasus link kedaluwarsa, sesi reset
+    hilang, dan rate limit.
+
+### Notes
+- `/reset-password` sengaja TIDAK dibungkus `PublicRoute` — setelah klik
+  link dari email, Supabase membuat sesi "recovery" sementara (`user`
+  jadi truthy), yang kalau dibungkus `PublicRoute` akan langsung
+  di-redirect ke `/` sebelum sempat atur kata sandi baru.
+- Kalau pengiriman email reset bermasalah (pernah terjadi sebelumnya di
+  project ini karena rate limit SMTP bawaan Supabase), jalur cadangan
+  tetap tersedia: reset manual lewat database.
+
+---
+
 ## [1.15.0] - 2026-07-18
 
 ### Security
