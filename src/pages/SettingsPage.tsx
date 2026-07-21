@@ -65,6 +65,17 @@ export function SettingsPage() {
     onError: (err) => toast.error(err.message),
   });
 
+  const telegramBackupMut = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('send-backup', { body: {} });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Gagal mengirim backup');
+      return data;
+    },
+    onSuccess: () => toast.success('Backup berhasil dikirim ke Telegram!'),
+    onError: (err) => toast.error(err.message),
+  });
+
   const settingsQ = useQuery({
     queryKey: ['settings', user?.id],
     queryFn: async () => {
@@ -418,6 +429,32 @@ export function SettingsPage() {
             <Button onClick={() => generateTgCodeMut.mutate()} disabled={generateTgCodeMut.isPending}>
               {generateTgCodeMut.isPending ? 'Membuat kode...' : 'Generate Kode Penghubung'}
             </Button>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Backup data (automatic, via Telegram) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Backup Otomatis (Telegram)</CardTitle>
+          <CardDescription>
+            Beda dengan "Backup Database" manual di bawah — ini terkirim OTOMATIS ke Telegram kamu setiap hari jam
+            06:00 WIB, jadi tidak perlu diingat-ingat untuk dijalankan sendiri.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            File backup dikirim sebagai dokumen JSON ke chat bot — simpan ke Google Drive atau tempat lain di luar
+            Supabase supaya benar-benar aman kalau ada masalah teknis di masa depan.
+          </p>
+          <Button variant="outline" onClick={() => telegramBackupMut.mutate()} disabled={telegramBackupMut.isPending}>
+            <Download className="mr-2 h-4 w-4" />
+            {telegramBackupMut.isPending ? 'Mengirim...' : 'Kirim Backup ke Telegram Sekarang'}
+          </Button>
+          {!tgAccountQ.data && (
+            <p className="text-xs text-destructive">
+              Hubungkan Telegram dulu (di atas) supaya backup bisa dikirim.
+            </p>
           )}
         </CardContent>
       </Card>

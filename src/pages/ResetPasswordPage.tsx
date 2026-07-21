@@ -39,13 +39,34 @@ export function ResetPasswordPage() {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   useEffect(() => {
-    // Link dari email Supabase memuat token di URL, yang otomatis diproses
-    // oleh client (detectSessionInUrl: true) menjadi sesi "recovery".
-    // Kita tunggu sebentar supaya proses itu selesai sebelum cek sesi.
-    supabase.auth.getSession().then(({ data }) => {
+    // Dengan flow PKCE, klien Supabase otomatis menukar ?code=... di URL
+    // jadi sesi "recovery" begitu halaman ini dimuat — tapi prosesnya
+    // async, jadi kita dengarkan event PASSWORD_RECOVERY / sesi yang
+    // sudah terbentuk, bukan cuma cek sekali di awal (supaya tidak
+    // "kepagian" sebelum proses tukar kode selesai).
+    let settled = false;
+
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
+        settled = true;
+        setSessionValid(true);
+        setReady(true);
+      }
+    });
+
+    // Fallback: kalau setelah beberapa saat tidak ada event apa pun
+    // (link memang sudah tidak valid), tampilkan pesan error.
+    const timeout = setTimeout(async () => {
+      if (settled) return;
+      const { data } = await supabase.auth.getSession();
       setSessionValid(!!data.session);
       setReady(true);
-    });
+    }, 2500);
+
+    return () => {
+      listener.subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const onSubmit = handleSubmit(async (data) => {

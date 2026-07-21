@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.16.0';
+export const APP_VERSION = '1.17.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.17.0',
+    date: '2026-07-20',
+    title: 'Backup Otomatis Harian + Perbaikan Link Reset Password',
+    changes: [
+      'Backup otomatis: seluruh data (grup, transaksi, saldo, PIN anggota) dikirim ke Telegram admin setiap hari jam 06:00 WIB sebagai file JSON — salinan ini berada DI LUAR Supabase.',
+      'Tombol "Kirim Backup ke Telegram Sekarang" di Pengaturan untuk backup manual kapan saja, terpisah dari fitur "Backup Database" manual yang sudah ada sebelumnya.',
+      'Diperbaiki: link reset password dari email sering gagal karena "dipakai duluan" oleh pemindai keamanan email (Gmail/Outlook). Sekarang pakai metode PKCE yang tahan terhadap masalah ini.',
+    ],
+  },
   {
     version: '1.16.0',
     date: '2026-07-18',

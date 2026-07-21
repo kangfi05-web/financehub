@@ -3,6 +3,39 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.17.0] - 2026-07-20
+
+### Added
+- **Backup otomatis harian** — belajar dari insiden project Supabase
+  lama yang hilang total tanpa jejak, sekarang ada salinan data yang
+  benar-benar berada DI LUAR Supabase:
+  - Extension `pg_cron` + `pg_net` diaktifkan.
+  - Fungsi `export_backup_json()`: mengumpulkan semua tabel penting
+    (termasuk `pin_code_hash` anggota, supaya PIN tidak perlu dibuat
+    ulang kalau harus restore).
+  - Job terjadwal `daily-financehub-backup`, jalan tiap hari jam 23:00
+    UTC (06:00 WIB), memanggil Edge Function baru `send-backup`.
+  - `send-backup` mengirim file JSON ke chat Telegram admin via
+    `sendDocument`.
+  - Tombol **"Kirim Backup ke Telegram Sekarang"** di Pengaturan untuk
+    backup manual kapan saja — terpisah dari fitur "Backup Database"
+    manual (unduh ke perangkat) yang sudah ada sebelumnya.
+
+### Fixed
+- **Link reset password sering gagal** ("token sudah tidak ada/
+  kedaluwarsa") meski baru saja dikirim. Penyebabnya: pemindai
+  keamanan email (Gmail/Outlook) otomatis "mencicipi" link di email
+  sebelum pengguna sempat klik, menghabiskan token sekali-pakainya.
+  Diperbaiki dengan beralih ke flow **PKCE** (`flowType: 'pkce'` di
+  client Supabase), yang mensyaratkan kode verifikasi lokal di browser
+  yang sama — pemindai otomatis tidak punya ini, jadi link tetap valid
+  saat pengguna asli mengkliknya.
+- `ResetPasswordPage` sekarang mendengarkan event `PASSWORD_RECOVERY`
+  dari `onAuthStateChange` (bukan cuma cek sesi sekali di awal), supaya
+  tidak "kepagian" sebelum proses tukar kode PKCE selesai.
+
+---
+
 ## [1.16.0] - 2026-07-18
 
 ### Added
