@@ -1,15 +1,20 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { UserPlus, Phone, MapPin, IdCard, Trash2, Eye, EyeOff } from 'lucide-react';
+import { UserPlus, Phone, MapPin, IdCard, Trash2, Eye, EyeOff, KeyRound, Copy } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth';
 import { formatDateTime } from '@/lib/format';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { CurrencyInput } from '@/components/CurrencyInput';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/EmptyState';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { toast } from 'sonner';
-import type { GroupJoinRequest, JoinRequestStatus } from '@/types';
+import type { GroupJoinRequest, JoinRequestStatus, Group } from '@/types';
 
 const STATUS_LABEL: Record<JoinRequestStatus, string> = {
   pending: 'Baru',
@@ -27,8 +32,13 @@ const STATUS_COLOR: Record<JoinRequestStatus, string> = {
 
 export function JoinRequestsPage() {
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [acceptRequest, setAcceptRequest] = useState<GroupJoinRequest | null>(null);
+  const [acceptGroupId, setAcceptGroupId] = useState('');
+  const [acceptCapital, setAcceptCapital] = useState(0);
+  const [resultPin, setResultPin] = useState<{ pin: string; memberName: string; groupName: string } | null>(null);
 
   const { data: requests = [], isLoading } = useQuery({
     queryKey: ['group_join_requests'],
@@ -40,6 +50,16 @@ export function JoinRequestsPage() {
       if (error) throw error;
       return data as GroupJoinRequest[];
     },
+  });
+
+  const { data: groups = [] } = useQuery({
+    queryKey: ['groups', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('groups').select('*').order('name');
+      if (error) throw error;
+      return data as Group[];
+    },
+    enabled: !!user,
   });
 
   const updateStatusMut = useMutation({
@@ -62,6 +82,49 @@ export function JoinRequestsPage() {
       toast.success('Permintaan dihapus');
       setConfirmDeleteId(null);
       qc.invalidateQueries({ queryKey: ['group_join_requests'] });
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const acceptMut = useMutation({
+    mutationFn: async () => {
+      if (!acceptRequest || !acceptGroupId || !user) throw new Error('Data tidak lengkap');
+      const group = groups.find((g) => g.id === acceptGroupId);
+      if (!group) throw new Error('Grup tidak ditemukan');
+
+      // 1. Tambahkan sebagai anggota grup
+      const { data: newMember, error: memberErr } = await supabase
+        .from('group_members')
+        .insert({
+          name: acceptRequest.full_name,
+          phone: acceptRequest.phone,
+          initial_capital: acceptCapital,
+          group_id: acceptGroupId,
+          user_id: user.id,
+        })
+        .select()
+        .single();
+      if (memberErr || !newMember) throw memberErr ?? new Error('Gagal menambah anggota');
+
+      // 2. Generate PIN akses monitoring untuk anggota baru ini
+      const pin = String(Math.floor(100000 + Math.random() * 900000));
+      const { error: pinErr } = await supabase.rpc('set_member_pin', { p_member_id: newMember.id, p_pin: pin });
+      if (pinErr) throw pinErr;
+
+      // 3. Tandai permintaan sebagai Diterima
+      const { error: statusErr } = await supabase
+        .from('group_join_requests')
+        .update({ status: 'approved' })
+        .eq('id', acceptRequest.id);
+      if (statusErr) throw statusErr;
+
+      return { pin, memberName: acceptRequest.full_name, groupName: group.name };
+    },
+    onSuccess: (result) => {
+      setResultPin(result);
+      setAcceptRequest(null);
+      qc.invalidateQueries({ queryKey: ['group_join_requests'] });
+      qc.invalidateQueries({ queryKey: ['group_members'] });
     },
     onError: (err) => toast.error(err.message),
   });
@@ -147,8 +210,11 @@ export function JoinRequestsPage() {
                       </Button>
                     )}
                     {r.status !== 'approved' && (
-                      <Button variant="outline" size="sm" className="text-success" onClick={() => updateStatusMut.mutate({ id: r.id, status: 'approved' })}>
-                        Tandai Diterima
+                      <Button
+                        variant="outline" size="sm" className="text-success"
+                        onClick={() => { setAcceptRequest(r); setAcceptGroupId(''); setAcceptCapital(0); }}
+                      >
+                        <KeyRound className="mr-1.5 h-3.5 w-3.5" /> Terima & Buatkan PIN
                       </Button>
                     )}
                     {r.status !== 'rejected' && (
@@ -166,10 +232,11 @@ export function JoinRequestsPage() {
 
       <Card className="bg-muted/30">
         <CardHeader>
-          <CardTitle className="text-sm">Langkah selanjutnya setelah "Diterima"</CardTitle>
+          <CardTitle className="text-sm">Cara kerja "Terima & Buatkan PIN"</CardTitle>
           <CardDescription>
-            Tambahkan orang ini sebagai anggota di grup yang sesuai (Keuangan Grup → Tambah Anggota), lalu generate
-            PIN akses monitoring lewat ikon kunci di kartu anggota. Bagikan PIN itu ke mereka via WhatsApp/telepon.
+            Sekali klik: orang ini otomatis ditambahkan sebagai anggota di grup pilihanmu, langsung dibuatkan PIN akses
+            monitoring, dan status permintaannya berubah jadi Diterima. Tinggal bagikan PIN yang muncul ke mereka via
+            WhatsApp/telepon.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -183,6 +250,74 @@ export function JoinRequestsPage() {
         destructive
         onConfirm={() => confirmDeleteId && deleteMut.mutate(confirmDeleteId)}
       />
+
+      {/* Dialog: pilih grup + modal awal sebelum menerima */}
+      <Dialog open={!!acceptRequest} onOpenChange={(o) => !o && setAcceptRequest(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Terima {acceptRequest?.full_name} sebagai Anggota</DialogTitle>
+            <DialogDescription>Pilih grup tujuan dan modal awal, PIN akses monitoring dibuat otomatis.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Grup Tujuan</Label>
+              <Select value={acceptGroupId} onValueChange={setAcceptGroupId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={groups.length === 0 ? 'Belum ada grup' : 'Pilih grup...'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {groups.map((g) => (
+                    <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {acceptRequest?.requested_group && (
+                <p className="text-xs text-muted-foreground">
+                  Minat pendaftar: <span className="font-medium">{acceptRequest.requested_group}</span>
+                </p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label>Modal Awal</Label>
+              <CurrencyInput value={acceptCapital} onValueChange={setAcceptCapital} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => acceptMut.mutate()}
+              disabled={!acceptGroupId || acceptMut.isPending}
+              className="w-full"
+            >
+              {acceptMut.isPending ? 'Memproses...' : 'Terima & Buatkan PIN'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: tampilkan PIN hasil generate, sekali tampil */}
+      <Dialog open={!!resultPin} onOpenChange={(o) => !o && setResultPin(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{resultPin?.memberName} Berhasil Ditambahkan!</DialogTitle>
+            <DialogDescription>
+              Sudah masuk ke grup {resultPin?.groupName}. Bagikan PIN ini ke mereka sekarang (catat, tidak akan tampil lagi):
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-lg border border-success/20 bg-success/5 p-4 text-center">
+            <p className="text-xs text-muted-foreground">PIN Akses Monitoring</p>
+            <p className="mt-1 text-3xl font-bold tracking-widest text-success">{resultPin?.pin}</p>
+            <Button
+              variant="outline" size="sm" className="mt-3"
+              onClick={() => { if (resultPin) { navigator.clipboard.writeText(resultPin.pin); toast.success('PIN disalin'); } }}
+            >
+              <Copy className="mr-1.5 h-3.5 w-3.5" /> Salin PIN
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Anggota buka <span className="font-mono text-foreground">/monitor</span>, masukkan PIN ini untuk lihat Keuangan Grup (read-only).
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

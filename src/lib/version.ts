@@ -1,7 +1,7 @@
 // FinanceHub — Version & Changelog Tracker
 // Setiap perbaikan/update aplikasi ditambahkan sebagai entri baru di sini.
 
-export const APP_VERSION = '1.17.0';
+export const APP_VERSION = '1.18.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -11,6 +11,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.18.0',
+    date: '2026-07-20',
+    title: 'Satu Klik: Terima Anggota + Buatkan PIN',
+    changes: [
+      'Halaman Permintaan Bergabung sekarang punya tombol "Terima & Buatkan PIN" — pilih grup tujuan dan modal awal, lalu satu klik langsung: anggota ditambahkan ke grup, PIN akses monitoring dibuat otomatis, dan status permintaan berubah jadi Diterima.',
+      'PIN yang baru dibuat langsung ditampilkan di layar untuk disalin dan dibagikan ke anggota.',
+      'Tidak perlu lagi bolak-balik antara halaman Permintaan Bergabung dan Keuangan Grup untuk menambah anggota baru.',
+    ],
+  },
   {
     version: '1.17.0',
     date: '2026-07-20',

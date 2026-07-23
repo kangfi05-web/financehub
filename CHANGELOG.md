@@ -3,6 +3,26 @@
 Semua perubahan penting pada FinanceHub dicatat di sini.
 Format mengikuti [Semantic Versioning](https://semver.org/): MAJOR.MINOR.PATCH.
 
+## [1.18.0] - 2026-07-20
+
+### Added
+- **Alur "Terima & Buatkan PIN" terpadu** di halaman Permintaan Bergabung:
+  - Klik tombol → pilih grup tujuan + modal awal di dialog.
+  - Satu klik "Terima & Buatkan PIN" langsung: insert `group_members`,
+    panggil `set_member_pin` RPC untuk generate PIN 6 digit, dan update
+    status permintaan jadi `approved` — tiga langkah manual sebelumnya
+    jadi satu aksi.
+  - PIN yang dihasilkan ditampilkan di dialog konfirmasi dengan tombol
+    salin, siap dibagikan ke anggota baru.
+- Query `groups` ditambahkan ke halaman ini untuk mengisi dropdown
+  pilihan grup tujuan.
+
+### Notes
+- Tidak ada perubahan pada skema database — memakai tabel dan fungsi
+  yang sudah ada (`group_members`, `set_member_pin`).
+
+---
+
 ## [1.17.0] - 2026-07-20
 
 ### Added
